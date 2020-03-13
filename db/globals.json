@@ -2354,7 +2354,7 @@
             "SkillPointsBeforeFatigue": 1,
             "SkillFatigueReset": 300,
             "EventType": [
-                "None"
+                "Christmas"
             ],
             "WalkSpeed": {
                 "x": 0.7,
