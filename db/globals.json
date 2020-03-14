@@ -2072,7 +2072,7 @@
                 "priceStabilizerEnabled": false,
                 "includePveTraderSales": false,
                 "priceStabilizerStartIntervalInHours": 1,
-                "minUserLevel": 10,
+                "minUserLevel": 15,
                 "communityTax": 2.5,
                 "communityItemTax": 2.5,
                 "communityRequirementTax": 2.5,
