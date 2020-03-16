@@ -1168,7 +1168,7 @@
                         "Dummy": 0
                     },
                     "Regeneration": {
-                        "LoopTime": 3,
+                        "LoopTime": 0.05,
                         "MinimumHealthPercentage": 30,
                         "Energy": 1,
                         "Hydration": 1,
@@ -2072,7 +2072,7 @@
                 "priceStabilizerEnabled": false,
                 "includePveTraderSales": false,
                 "priceStabilizerStartIntervalInHours": 1,
-                "minUserLevel": 15,
+                "minUserLevel": 10,
                 "communityTax": 2.5,
                 "communityItemTax": 2.5,
                 "communityRequirementTax": 2.5,
