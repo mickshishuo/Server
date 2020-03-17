@@ -61,7 +61,8 @@ class AccountServer {
 			"edition": info.edition
 		}
 		
-		this.saveToDisk();
+        this.saveToDisk();
+        return "OK";
 	}
 
     login(data) {
@@ -93,7 +94,7 @@ class AccountServer {
             this.saveToDisk();
         }
 
-        return accountId.toString();
+        return accountId;
     }
 
     changeEmail(info) {
@@ -104,7 +105,7 @@ class AccountServer {
             this.saveToDisk();
         }
 
-        return accountId.toString();
+        return accountId;
     }
 
     changePassword(info) {
@@ -115,7 +116,7 @@ class AccountServer {
             this.saveToDisk();
         }
 
-        return accountId.toString();
+        return accountId;
     }
 
     getReservedNickname(sessionID) {

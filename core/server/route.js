@@ -191,7 +191,7 @@ function scanRecursiveRoute(filepath) {
 function routeAll() {
     db = scanRecursiveRoute("db/");
     res = scanRecursiveRoute("res/");
-    json.write("user/cache/loadorder.json", json.parse(json.read("src/loadorder.json")))
+    json.write("user/cache/loadorder.json", json.parse(json.read("src/loadorder.json")));
 
     /* add important server paths */
     db.user = {
