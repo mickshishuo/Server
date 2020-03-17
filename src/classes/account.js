@@ -67,8 +67,7 @@ class AccountServer {
 
     login(data) {
         let info = json.parse(Buffer.from(data.token, 'base64').toString('utf8'));
-        let sessionID = this.exists(info);
-        return sessionID.toString();
+        return this.exists(info);
     }
 
     register(info) {
