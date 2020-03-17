@@ -11,7 +11,7 @@ let settings = JSON.parse(readJson(__dirname + "/../../user/configs/server.json"
 
 const url = settings.ip;
 const port = settings.port;
-const gameVersion = '0.12.3.5985';
+const gameVersion = '0.12.4.6269';
 
 let integer = 0;
 

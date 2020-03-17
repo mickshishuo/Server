@@ -41,13 +41,32 @@ class AccountServer {
         for (let accountId of Object.keys(this.accounts)) {
             let account = this.accounts[accountId];
 
-            if (info.email === account.email && info.password === account.password) {
-                return account.id;
+            if (info.email === account.email) {
+				if(info.password === account.password) {
+					return account.id;
+				} else {
+					return 0;
+				}
             }
         }
 
-        return 0;
+        return -1;
     }
+    
+    createAccount(info) {
+		let sessionID = (Object.keys(this.accounts).length + 1).toString();
+		this.accounts[sessionID] = {
+			id: Number(sessionID),
+			nickname: "",
+			email: info.email,
+			password: info.password,
+			wipe: true,
+			edition: "eod"
+		}
+		
+		this.saveToDisk();
+		return sessionID;
+	}
 
     getReservedNickname(sessionID) {
         return this.accounts[sessionID].nickname;
@@ -59,7 +78,11 @@ class AccountServer {
         let info = json.parse(text);
         let sessionID = this.exists(info);
 
-        return sessionID.toString();
+		if (sessionID == -1) {
+			return this.createAccount(info);
+		} else {	
+			return sessionID.toString();
+		}
     }
 }
 
