@@ -29,7 +29,8 @@ const questLootTypes = [
   "loot_shop_oli_vedodmost_part25862028",
   "loot_book_venskiy5864616",
   "loot_book_osnovu5868064",
-  "Loot 56 (28)6937524"
+  "Loot 56 (28)6937524",
+  "loot_flash_"
 ];
 
 function getDirList(path) {
