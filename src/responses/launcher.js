@@ -5,8 +5,33 @@
 
 "use strict";
 
-function loginUser(url, info, sessionID) {
-    return account_f.accountServer.findID(info);
+function connect() {
+    return "OK";
 }
 
-router.addStaticRoute("/launcher/profile/login", loginUser);
+function login(url, info, sessionID) {
+    return account_f.accountServer.login(info);
+}
+
+function register(url, info, sessionID) {
+    return account_f.accountServer.register(info);
+}
+
+function remove(url, info, sessionID) {
+    return account_f.accountServer.remove(info);
+}
+
+function changeEmail(url, info, sessionID) {
+    return account_f.accountServer.changeEmail(info);
+}
+
+function changePassword(url, info, sessionID) {
+    return account_f.accountServer.changePassword(info);
+}
+
+router.addStaticRoute("/launcher/connect", connect);
+router.addStaticRoute("/launcher/profile/login", login);
+router.addStaticRoute("/launcher/profile/register", register);
+router.addStaticRoute("/launcher/profile/remove", remove);
+router.addStaticRoute("/launcher/profile/changeEmail", changeEmail);
+router.addStaticRoute("/launcher/profile/changePassword", changePassword);
