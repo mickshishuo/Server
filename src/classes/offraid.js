@@ -7,8 +7,21 @@ function removeLabKeyCard(offraidData) {
     }
 
     for (let item of offraidData.profile.Inventory.items) {
-        if (item._tpl === "5c94bbff86f7747ee735c08f" && item.slotId !== "Hideout") {
-            move_f.removeItemFromProfile(offraidData.profile, item._id);
+        if (item._tpl === "5c94bbff86f7747ee735c08f" && item.slotId !== "Hideout") 
+        {
+            //this will not correctly 
+            let usages = ("upd" in item && "Key" in item.upd) ? item.upd.Key.NumberOfUsages : -1;
+            if (usages == -1)
+            {
+                item.upd = {"Key": {"NumberOfUsages": 1 } };
+            }else
+            {
+                item.upd.Key.NumberOfUsages += 1;
+            }
+            if(item.upd.Key.NumberOfUsages >= itm_hf.getItem("5c94bbff86f7747ee735c08f")[1]._props.MaximumNumberOfUsage)
+            {   
+                move_f.removeItemFromProfile(offraidData.profile, item._id);
+            }
             break;
         }
     }
