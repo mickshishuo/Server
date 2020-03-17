@@ -9,6 +9,10 @@ function connect() {
     return "OK";
 }
 
+function editions() {
+    return Object.keys(db.profile);
+}
+
 function login(url, info, sessionID) {
     let output = account_f.accountServer.login(info);
     return output.toString();
@@ -24,6 +28,10 @@ function remove(url, info, sessionID) {
     return (output === 0) ? "FAILED" : "OK";
 }
 
+function get(url, info, sessionID) {
+    return account_f.accountServer.find(info.accountId);
+}
+
 function changeEmail(url, info, sessionID) {
     let output = account_f.accountServer.changeEmail(info);
     return (output === 0) ? "FAILED" : "OK";
@@ -35,8 +43,10 @@ function changePassword(url, info, sessionID) {
 }
 
 router.addStaticRoute("/launcher/server/connect", connect);
+router.addStaticRoute("/launcher/server/editions", editions);
 router.addStaticRoute("/launcher/profile/login", login);
 router.addStaticRoute("/launcher/profile/register", register);
 router.addStaticRoute("/launcher/profile/remove", remove);
+router.addStaticRoute("/launcher/profile/get", remove);
 router.addStaticRoute("/launcher/profile/changeEmail", changeEmail);
 router.addStaticRoute("/launcher/profile/changePassword", changePassword);
