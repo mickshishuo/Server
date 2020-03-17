@@ -34,7 +34,7 @@ function changePassword(url, info, sessionID) {
     return (output === 0) ? "FAILED" : "OK";
 }
 
-router.addStaticRoute("/launcher/connect", connect);
+router.addStaticRoute("/launcher/server/connect", connect);
 router.addStaticRoute("/launcher/profile/login", login);
 router.addStaticRoute("/launcher/profile/register", register);
 router.addStaticRoute("/launcher/profile/remove", remove);
