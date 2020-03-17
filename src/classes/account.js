@@ -62,7 +62,6 @@ class AccountServer {
 		}
 		
         this.saveToDisk();
-        return "OK";
 	}
 
     login(data) {
