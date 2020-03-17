@@ -67,6 +67,8 @@
 					"filters": [
 						{
 							"Filter": [
+								"5e2af51086f7746d3f3c3402",
+								"5656eb674bdc2d35148b457c",
 								"543be6564bdc2df4348b4568"
 							],
 							"ExcludedFilter": []
