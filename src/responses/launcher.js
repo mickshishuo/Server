@@ -14,7 +14,7 @@ function login(url, info, sessionID) {
 }
 
 function register(url, info, sessionID) {
-    return account_f.accountServer.register(info);
+    account_f.accountServer.register(info);
 }
 
 function remove(url, info, sessionID) {
