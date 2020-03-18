@@ -42,6 +42,11 @@ function changePassword(url, info, sessionID) {
     return (output === 0) ? "FAILED" : "OK";
 }
 
+function wipe() {
+    let output = account_f.accountServer.wipe(info);
+    return (output === 0) ? "FAILED" : "OK";
+}
+
 router.addStaticRoute("/launcher/server/connect", connect);
 router.addStaticRoute("/launcher/server/editions", editions);
 router.addStaticRoute("/launcher/profile/login", login);
@@ -50,3 +55,4 @@ router.addStaticRoute("/launcher/profile/remove", remove);
 router.addStaticRoute("/launcher/profile/get", remove);
 router.addStaticRoute("/launcher/profile/changeEmail", changeEmail);
 router.addStaticRoute("/launcher/profile/changePassword", changePassword);
+router.addStaticRoute("/launcher/profile/wipe", wipe);

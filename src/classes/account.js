@@ -117,6 +117,18 @@ class AccountServer {
         return accountId;
     }
 
+    wipe(info) {
+        let accountId = this.exists(info.email, info.password);  
+
+        if (accountId !== 0) {
+            this.accounts[sessionID].edition = info.edition;
+            this.setWipe(accountId, true);
+            this.saveToDisk();
+        }
+
+        return accountId;
+    }
+
     getReservedNickname(sessionID) {
         return this.accounts[sessionID].nickname;
     }
