@@ -112,6 +112,7 @@ function updatePlayerHideout(sessionID) {
 
 function updateFuel(generatorArea,solarPower)
 {   
+    let noFuelAtAll = true;
     let decreaseFuel = 0.0665;
 
     if(solarPower == 1){ decreaseFuel = 0.0332; }
@@ -130,20 +131,24 @@ function updateFuel(generatorArea,solarPower)
             {
                 resourceValue -= decreaseFuel
             }
-            resourceValue = Math.round(resourceValue * 1000) / 1000;
+            resourceValue = Math.round(resourceValue * 10000) / 10000;
 
             if(resourceValue>0)
             {
                 generatorArea.slots[i].item[0].upd ={ "StackObjectsCount": 1,"Resource": {"Value": resourceValue} };
                 console.log("Generator : " + resourceValue + " fuel left on slot " + (i+1) )
+                noFuelAtAll = false
+                break;//break here to avoid update all the fuel tanks and only update if fuel Ressource > 0
             }
             else//if fuel is empty, remove it
             {
-                generatorArea.slots[i].item[0] = null;
+                generatorArea.slots[i].item[0].upd ={ "StackObjectsCount": 1,"Resource": {"Value": 0} };
             }  
-            break;//break here to avoid update all the fuel tanks
+            
         }
     }
+    if(noFuelAtAll == true){ generatorArea.active = false; }
+    
     return generatorArea;
 }
 
