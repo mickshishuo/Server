@@ -3,5 +3,5 @@
 	"port": 443,
 	"eventPollIntervalSec": 60,
 	"rebuildCache": false,
-	"name": "EmuTarkov server"
+	"name": "EmuTarkov Server"
 }
