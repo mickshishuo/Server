@@ -42,7 +42,7 @@ function changePassword(url, info, sessionID) {
     return (output === 0) ? "FAILED" : "OK";
 }
 
-function wipe() {
+function wipe(url, info, sessionID) {
     let output = account_f.accountServer.wipe(info);
     return (output === 0) ? "FAILED" : "OK";
 }
