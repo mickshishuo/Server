@@ -6,7 +6,8 @@
 "use strict";
 
 function connect() {
-    return "OK";
+    let output = server.getName();
+    return (output === "" || output === null) ? "FAILED" : output;
 }
 
 function editions() {

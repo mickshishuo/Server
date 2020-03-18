@@ -26,6 +26,7 @@ class Server {
         this.startCallback = {};
         this.receiveCallback = {};
         this.respondCallback = {};
+        this.name = serverConfig.name;
         this.ip = serverConfig.ip;
         this.port = serverConfig.port;
         this.backendUrl = "https://" + this.ip + ":" + this.port;
@@ -74,6 +75,10 @@ class Server {
 
     addRespondCallback(type, worker) {
         this.respondCallback[type] = worker;
+    }
+
+    getName() {
+        return this.name;
     }
 
     getIp() {
