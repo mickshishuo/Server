@@ -68,7 +68,8 @@ class HealthServer {
                         item.upd.FoodDrink.HpPercent -= body.count; 
                     } else {
                         item.upd.FoodDrink = {"HpPercent" : maxResource - body.count};
-                    } 
+                    }
+                    
                     resourceLeft = item.upd.FoodDrink.HpPercent;
                 }
             }
