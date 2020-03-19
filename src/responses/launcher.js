@@ -11,7 +11,7 @@ function connect() {
 }
 
 function editions() {
-    return Object.keys(db.profile);
+    return json.stringify(Object.keys(db.profile));
 }
 
 function login(url, info, sessionID) {

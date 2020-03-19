@@ -52,14 +52,14 @@ class AccountServer {
     register(info) {
         let sessionID = (Object.keys(this.accounts).length + 1);
         
-	this.accounts[sessionID] = {
-		"id": sessionID,
-		"nickname": "",
-		"email": info.email,
-		"password": info.password,
-		"wipe": true,
-		"edition": info.edition
-	}
+        this.accounts[sessionID] = {
+            "id": sessionID,
+            "nickname": "",
+            "email": info.email,
+            "password": info.password,
+            "wipe": true,
+            "edition": info.edition
+        }
 		
         this.saveToDisk();
     }
