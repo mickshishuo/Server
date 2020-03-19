@@ -49,22 +49,17 @@ class AccountServer {
         this.accounts[sessionID].wipe = state;
     }
 
-    login(data) {
-        let info = json.parse(Buffer.from(data.token, 'base64').toString('utf8'));
-        return this.exists(info);
-    }
-
     register(info) {
         let sessionID = (Object.keys(this.accounts).length + 1);
         
-		this.accounts[sessionID] = {
-			"id": sessionID,
-			"nickname": "",
-			"email": info.email,
-			"password": info.password,
-			"wipe": true,
-			"edition": info.edition
-		}
+	this.accounts[sessionID] = {
+		"id": sessionID,
+		"nickname": "",
+		"email": info.email,
+		"password": info.password,
+		"wipe": true,
+		"edition": info.edition
+	}
 		
         this.saveToDisk();
     }
@@ -84,7 +79,7 @@ class AccountServer {
         let accountId = this.exists(info.email, info.password);  
 
         if (accountId !== 0) {
-            this.accounts[sessionID].email = info.new;
+            this.accounts[sessionID].email = info.change;
             this.saveToDisk();
         }
 
@@ -95,7 +90,7 @@ class AccountServer {
         let accountId = this.exists(info.email, info.password);  
 
         if (accountId !== 0) {
-            this.accounts[sessionID].password = info.new;
+            this.accounts[sessionID].password = info.change;
             this.saveToDisk();
         }
 
