@@ -252,8 +252,29 @@ function continuousProductionStart(pmcData, body, sessionID) {
 	return item_f.itemServer.getOutput();
 }
 
+function getBTC(pmcData, body, sessionID) {
+	let output = item_f.itemServer.getOutput();
+
+	let newBTC = {
+		"item_id": "59faff1d86f7746c51718c9c",
+		"count": 1,
+		"tid": "ragfair"
+	};
+
+	for(let bitcoin in pmcData.Hideout.Production["20"].Products) {
+		output = move_f.addItem(pmcData, newBTC, output, sessionID, true);
+	}
+	pmcData.Hideout.Production["20"].Products = [];
+
+	return output;
+}
+
 function takeProduction(pmcData, body, sessionID) {
 	let output = item_f.itemServer.getOutput();
+
+	if(body.recipeId === "5d5c205bd582a50d042a3c0e") {
+		return getBTC(pmcData, body, sessionID);
+	}
 
 	for (let receipe in production.data) {	
 		if (body.recipeId !== production.data[receipe]._id) {
@@ -262,7 +283,7 @@ function takeProduction(pmcData, body, sessionID) {
 
 		// delete the production in profile Hideout.Production
 		for (let prod in pmcData.Hideout.Production) {
-			if (pmcData.Hideout.Production[prod].RecipeId === body.recipeId && pmcData.Hideout.Production[prod].RecipeId !== "5d5c205bd582a50d042a3c0e") {
+			if (pmcData.Hideout.Production[prod].RecipeId === body.recipeId) {
 				delete pmcData.Hideout.Production[prod];
 			}
 		}
