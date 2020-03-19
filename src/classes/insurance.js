@@ -127,7 +127,7 @@ class InsuranceServer {
 
     processReturn(event) {
         // Inject a little bit of a surprise by failing the insurance from time to time ;)
-        if (utility.getRandomInt(0, 99) > gameplayConfig.trading.insureReturnChance) {
+        if (utility.getRandomInt(0, 99) >= gameplayConfig.trading.insureReturnChance) {
             let insuranceFailedTemplates = json.parse(json.read(db.dialogues[event.data.traderId])).insuranceFailed;
             event.data.messageContent.templateId = insuranceFailedTemplates[utility.getRandomInt(0, insuranceFailedTemplates.length)];
             event.data.items = [];

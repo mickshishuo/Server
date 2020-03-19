@@ -190,7 +190,7 @@ function updateAirFilters(airFilterArea)
 function updateBitcoinFarm(btcProd,farmReceipe,btcFarmCGs,isGeneratorOn)
 {
     let startTimelessSkip = btcProd.StartTime + btcProd.SkipTime;
-    let time_elapsed = (Math.floor(Date.now() / 1000) - startTimelessSkip) - btcProd.Progress;
+    let time_elapsed = (Math.floor(Date.now() / 1000) - startTimelessSkip);
 
     if(isGeneratorOn == true)
     {
@@ -204,27 +204,23 @@ function updateBitcoinFarm(btcProd,farmReceipe,btcFarmCGs,isGeneratorOn)
     let t2 = Math.pow( (0.05 + (btcFarmCGs - 1) / 49 * 0.15), -1);//THE FUNCTION TO REDUCE TIME OF PRODUCTION DEPENDING OF CGS
     let final_prodtime = Math.floor(t2*3600)
 
-    if(btcProd.Progress > final_prodtime && btcProd.Products[0] === undefined)
-    {
-        /*
-        btcProd.Products.push({
-            "_id" : 
-        });
-        */
-        //btcProd.Products.push({ id: newid(), tpl:farmReceipe.Endproduct,upd:{stackthingblablabal:1}})
+    while(btcProd.Progress > final_prodtime) {
+        if(btcProd.Products.length < 3) {
+            btcProd.Products.push({
+                "_id": utility.generateNewItemId(),
+                "_tpl": "59faff1d86f7746c51718c9c",
+                "upd": {
+                    "StackObjectsCount": 1
+                }
+            });
+            btcProd.Progress -= final_prodtime;
+        } else {
+            btcProd.Progress = 0;
+        }
     }
-    if(btcProd.Progress > final_prodtime*2 && btcProd.Products[1] === undefined)
-    {
-        //store second bitcoin
-    }
-    if(btcProd.Progress > final_prodtime*3 && btcProd.Products[2] === undefined)
-    {
-        //register a third bitcoin
-        //btcProd.Progress = 0;
-        //btcProd.SkipTime = 0;
-        //btcProd.StartTime = now;
-    }
-    
+
+    btcProd.SkipTime = 0;
+    btcProd.StartTime = Date.now() / 1000;
     return btcProd;
 }
 

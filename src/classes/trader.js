@@ -177,9 +177,11 @@ class TraderServer {
 
     getAllCustomization(sessionID) {
         let output = [];
-
-        for (let traderId in this.customizationArray) {
-            output = output.concat(this.getCustomization(traderId, sessionID));
+        
+		for (let traderId in this.traders) {
+			if(db.user.cache["customization_" + traderId] !== undefined) {
+				output = output.concat(this.getCustomization(traderId, sessionID));
+			}
         }
 
         return output;
