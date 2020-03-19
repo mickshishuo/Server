@@ -15,7 +15,7 @@ function editions() {
 }
 
 function login(url, info, sessionID) {
-    let output = account_f.accountServer.login(info);
+    let output = account_f.accountServer.exists(info);
     return output.toString();
 }
 
