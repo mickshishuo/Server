@@ -6,7 +6,9 @@ class DialogueServer {
 	}
 
 	initializeDialogue(sessionID) {
-		this.dialogues[sessionID] = json.parse(json.read(getPath(sessionID)));
+		if(this.dialogues[sessionID] === undefined) {
+			this.dialogues[sessionID] = json.parse(json.read(getPath(sessionID)));
+		}
 	}
 
 	saveToDisk(sessionID) {
@@ -52,6 +54,9 @@ class DialogueServer {
 	* Add a templated message to the dialogue.
 	*/
 	addDialogueMessage(dialogueID, messageContent, sessionID, rewards = []) {
+		if(this.dialogues[sessionID] === undefined) {
+			this.initializeDialogue(sessionID);
+		}
 		let dialogueData = this.dialogues[sessionID];
 		let isNewDialogue = !(dialogueID in dialogueData);
 		let dialogue = dialogueData[dialogueID];
