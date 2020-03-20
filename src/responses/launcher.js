@@ -6,12 +6,7 @@
 "use strict";
 
 function connect() {
-    let output = server.getName();
-    return (output === "" || output === null) ? "FAILED" : output;
-}
-
-function editions() {
-    return json.stringify(Object.keys(db.profile));
+    return json.stringify({"backendUrl": server.getBackendUrl(), "name": server.getName(), "editions": Object.keys(db.profile)});
 }
 
 function login(url, info, sessionID) {
@@ -49,7 +44,6 @@ function wipe(url, info, sessionID) {
 }
 
 router.addStaticRoute("/launcher/server/connect", connect);
-router.addStaticRoute("/launcher/server/editions", editions);
 router.addStaticRoute("/launcher/profile/login", login);
 router.addStaticRoute("/launcher/profile/register", register);
 router.addStaticRoute("/launcher/profile/remove", remove);
