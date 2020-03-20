@@ -50,7 +50,6 @@ function upgrade(pmcData, body, sessionID) {
 }
 
 // validating the upgrade
-// TODO: apply bonuses or is it automatically applied?
 function upgradeComplete(pmcData, body, sessionID) {
 	for (let hideoutArea in pmcData.Hideout.Areas) {
 		if (pmcData.Hideout.Areas[hideoutArea].type !== body.areaType){ continue; }
@@ -63,21 +62,18 @@ function upgradeComplete(pmcData, body, sessionID) {
 		//go to apply bonuses
 		for(let area_bonus of areas.data)
 		{
-			if( area_bonus.type != pmcData.Hideout.Areas[hideoutArea].type){ continue; }
+			if( area_bonus.type !== pmcData.Hideout.Areas[hideoutArea].type){ continue; }
 
 			let arrayofBonuses = area_bonus.stages[pmcData.Hideout.Areas[hideoutArea].level].bonuses;
 
 			if(arrayofBonuses.length > 0)
 			{
-				for(let bonusesInArray of arrayofBonuses)
+				for(let bonusInArray of arrayofBonuses)
 				{
-					applyPlayerUpgradesBonuses(bonusesInArray,pmcData);
+					pmcData.Bonuses.push(bonusInArray); //just do stupid things like bsg does
 				}
 			}
-
-
 		}
-
 	}
 	return item_f.itemServer.getOutput();
 }
@@ -348,57 +344,6 @@ function registerProduction(pmcData, body, sessionID) {
 				"StartTime": Math.floor(Date.now() / 1000)
 			};
 		}
-	}
-}
-
-
-function applyPlayerUpgradesBonuses(bonuses,pmcData)
-{
-	switch(bonuses.type)
-	{
-		case "StashSize":
-			break;
-
-		case "MaximumEnergyReserve":
-			break;
-
-		case "EnergyRegeneration":
-			break;
-
-		case "HydrationRegeneration":
-			break;
-
-		case "HealthRegeneration":
-			break;
-
-		case "DebuffEndDelay":
-			break;
-
-		case "ScavCooldownTimer":
-			break;
-
-		case "QuestMoneyReward":
-			break;
-
-		case "InsuranceReturnTime":
-			break;
-
-		case "ExperienceRate":
-			break;
-
-		case "SkillGroupLevelingBoost":
-			break;
-
-		case "RagfairCommission":
-			break;
-
-		case "AdditionalSlots":
-		case "UnlockWeaponModification":
-		case "TextBonus":
-		case "FuelConsumption":
-			//do nothing its already handled
-			break;
-
 	}
 }
 
