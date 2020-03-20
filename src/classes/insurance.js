@@ -137,6 +137,20 @@ class InsuranceServer {
     }
 }
 
+// TODO: Move to helper functions
+function getItemPrice(_tpl) {
+	let price = 0;
+	if(_tpl in db.templates.items) {
+		let template = json.parse(json.read(db.templates.items[_tpl]));
+		price = template.Price;
+	} else {
+		let item = json.parse(json.read(db.items[_tpl]));
+		price = item._props.CreditsPrice;
+	}
+	
+	return price;
+}
+
 /* calculates insurance cost */
 function cost(info, sessionID) {
     let output = {};
@@ -148,8 +162,7 @@ function cost(info, sessionID) {
         for (let key of info.items) {
             for (let item of pmcData.Inventory.items) {
                 if (item._id === key) {
-                    let template = json.parse(json.read(db.templates.items[item._tpl]));
-                    items[template.Id] = Math.round(template.Price * gameplayConfig.trading.insureMultiplier);
+                    items[item._tpl] = Math.round(getItemPrice(item._tpl) * gameplayConfig.trading.insureMultiplier);
                     break;
                 }
             }
@@ -169,11 +182,9 @@ function insure(pmcData, body, sessionID) {
     for (let key of body.items) {
         for (let item of pmcData.Inventory.items) {
             if (item._id === key) {
-                let template = json.parse(json.read(db.templates.items[item._tpl]));
-
                 itemsToPay.push({
                     "id": item._id,
-                    "count": Math.round(template.Price * gameplayConfig.trading.insureMultiplier)
+                    "count": Math.round(getItemPrice(item._tpl) * gameplayConfig.trading.insureMultiplier)
                 });
                 break;
             }
