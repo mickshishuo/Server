@@ -56,7 +56,7 @@ describe('Client', function() {
   describe('/launcher/profile/login', function() {
     it('should login', async function() {
       const path = '/launcher/profile/login';
-      const data = '{"token" : "eyJlbWFpbCI6InVzZXJAamV0LmNvbSIsInBhc3N3b3JkIjoicGFzc3dvcmQiLCJ0b2dnbGUiOnRydWUsInRpbWVzdGFtcCI6MTU3NzU3MjgzOX0==" }';
+      const data = '{"token" : "eyJlbWFpbCI6InVzZXJAZW11dGFya292LmNvbSIsInBhc3N3b3JkIjoicGFzc3dvcmQiLCJ0b2dnbGUiOnRydWUsInRpbWVzdGFtcCI6MTU3NzU3MjgzOX0=" }';
 
       let res = await send(url, port, path, data);
       const jsonData = parseData(res);
