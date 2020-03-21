@@ -6,7 +6,11 @@
 "use strict";
 
 function connect() {
-    return json.stringify({"backendUrl": server.getBackendUrl(), "name": server.getName(), "editions": Object.keys(db.profile)});
+    return json.stringify({
+        "backendUrl": server.getBackendUrl(),
+        "name": server.getName(),
+        "editions": Object.keys(db.profile)
+    });
 }
 
 function login(url, info, sessionID) {
