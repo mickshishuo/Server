@@ -7,7 +7,7 @@ function clearString(string) {
 	return string.replace(/[\r\n\t]/g, '').replace(/\s\s+/g, '').replace(/[\\]/g, "");
 }
 
-function adlerGen(string){
+function adlerGen(string) {
 	return adler32.sum(string);
 }
 
@@ -43,7 +43,6 @@ function removeDir(dir) {
 
 function getTimestamp() {
     let time = new Date();
-
     return Math.floor(time.getTime() / 1000);
 }
 
@@ -52,7 +51,6 @@ function getTime() {
     let hours = ("0" + today.getHours()).substr(-2);
     let minutes = ("0" + today.getMinutes()).substr(-2);
     let seconds = ("0" + today.getSeconds()).substr(-2);
-
     return hours + "-" + minutes + "-" + seconds;
 }
 
@@ -60,7 +58,6 @@ function getDate() {
     let today = new Date();
     let day = ("0" + today.getDate()).substr(-2);
     let month = ("0" + (today.getMonth() + 1)).substr(-2);
-
     return today.getFullYear() + "-" + month + "-" + day;
 }
 
@@ -98,7 +95,6 @@ function generateNewId(prefix) {
     let random = getRandomInt(1000000000, 9999999999).toString();
     let retVal = prefix + (month + date + hour + minute + second + random).toString();
     let sign = makeSign(24 - retVal.length).toString();
-    
     return retVal + sign;
 }
 
