@@ -1,7 +1,7 @@
 {
     "autosave": {
-        "saveOnExit": true,
         "saveOnReceive": true,
+        "saveOnExit": false,
         "saveIntervalSec": 0
     },
     "inraid": {
