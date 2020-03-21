@@ -50,8 +50,14 @@ class AccountServer {
     }
 
     register(info) {
-        let sessionID = (Object.keys(this.accounts).length + 1);
+        for (let accountId in this.accounts) {
+            if (info.email === this.accounts[accountId].email) {
+				return accountId;
+            }
+        }
         
+        let sessionID = (Object.keys(this.accounts).length + 1);
+
         this.accounts[sessionID] = {
             "id": sessionID,
             "nickname": "",
@@ -60,8 +66,9 @@ class AccountServer {
             "wipe": true,
             "edition": info.edition
         }
-		
+        
         this.saveToDisk();
+        return 0;
     }
     
     remove(info) {

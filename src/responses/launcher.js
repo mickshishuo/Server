@@ -15,8 +15,8 @@ function login(url, info, sessionID) {
 }
 
 function register(url, info, sessionID) {
-    account_f.accountServer.register(info);
-    return "OK";
+    let output = account_f.accountServer.register(info);
+    return (output !== 0) ? "FAILED" : "OK";
 }
 
 function remove(url, info, sessionID) {
