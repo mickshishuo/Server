@@ -11,7 +11,7 @@ function connect() {
 
 function login(url, info, sessionID) {
     let output = account_f.accountServer.exists(info);
-    return (output !== "") ? "FAILED" : output;
+    return (output === "") ? "FAILED" : output;
 }
 
 function register(url, info, sessionID) {
