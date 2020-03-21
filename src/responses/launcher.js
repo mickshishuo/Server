@@ -25,7 +25,7 @@ function remove(url, info, sessionID) {
 }
 
 function get(url, info, sessionID) {
-    return account_f.accountServer.find(info.accountId);
+    return json.stringify(account_f.accountServer.find(info.accountId));
 }
 
 function changeEmail(url, info, sessionID) {
