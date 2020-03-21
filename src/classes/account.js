@@ -38,7 +38,7 @@ class AccountServer {
             }
         }
 
-        return 0;
+        return "";
     }
 
     isWiped(sessionID) {
@@ -56,7 +56,7 @@ class AccountServer {
             }
         }
         
-        let sessionID = (Object.keys(this.accounts).length + 1);
+        let sessionID = utility.generateNewAccountId();
 
         this.accounts[sessionID] = {
             "id": sessionID,
@@ -68,13 +68,13 @@ class AccountServer {
         }
         
         this.saveToDisk();
-        return 0;
+        return "";
     }
     
     remove(info) {
         let accountId = this.exists(info.email, info.password);  
 
-        if (accountId !== 0) {
+        if (accountId !== "") {
             delete this.accounts[accountId];
             this.saveToDisk();
         }
@@ -85,7 +85,7 @@ class AccountServer {
     changeEmail(info) {
         let accountId = this.exists(info.email, info.password);  
 
-        if (accountId !== 0) {
+        if (accountId !== "") {
             this.accounts[sessionID].email = info.change;
             this.saveToDisk();
         }
@@ -96,7 +96,7 @@ class AccountServer {
     changePassword(info) {
         let accountId = this.exists(info.email, info.password);  
 
-        if (accountId !== 0) {
+        if (accountId !== "") {
             this.accounts[sessionID].password = info.change;
             this.saveToDisk();
         }
@@ -107,7 +107,7 @@ class AccountServer {
     wipe(info) {
         let accountId = this.exists(info.email, info.password);  
 
-        if (accountId !== 0) {
+        if (accountId !== "") {
             this.accounts[sessionID].edition = info.edition;
             this.setWipe(accountId, true);
             this.saveToDisk();

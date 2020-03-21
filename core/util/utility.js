@@ -76,8 +76,8 @@ function makeSign(length) {
     return result;
 }
 
-function generateNewAssortId() {
-    return generateNewId("A");
+function generateNewAccountId() {
+    return generateNewId("AID");
 }
 
 function generateNewItemId() {
@@ -112,6 +112,6 @@ module.exports.getTimestamp = getTimestamp;
 module.exports.getTime = getTime;
 module.exports.getDate = getDate;
 module.exports.makeSign = makeSign;
+module.exports.generateNewAccountId = generateNewAccountId;
 module.exports.generateNewItemId = generateNewItemId;
-module.exports.generateNewAssortId = generateNewAssortId;
 module.exports.generateNewDialogueId = generateNewDialogueId;
