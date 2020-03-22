@@ -155,7 +155,7 @@ class Server {
 
     handleRequest(req, resp) {
         const IP = req.connection.remoteAddress.replace("::ffff:", "");
-        const sessionID = parseInt(getCookies(req)['PHPSESSID']);
+        const sessionID = getCookies(req)['PHPSESSID'];
 
         logger.logRequest("[" + sessionID + "][" + IP + "] " + req.url);
     
