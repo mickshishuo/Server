@@ -178,10 +178,10 @@ class Server {
         if (req.method === "PUT") {
             req.on('data', function(data) {
                 // receive data
-                if (req.headers.hasOwnProperty("expect")) {
+                if ("expect" in req.headers) {
                     const requestLength = parseInt(req.headers["content-length"]);
     
-                    if (!server.putInBuffer(parseInt(req.headers.sessionid), data, requestLength)) {
+                    if (!server.putInBuffer(req.headers.sessionid, data, requestLength)) {
                         resp.writeContinue();
                     }
                 }
