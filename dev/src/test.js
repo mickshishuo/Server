@@ -14,6 +14,7 @@ const port = settings.port;
 const gameVersion = '0.12.4.6269';
 
 let integer = 0;
+let accountID = 0;
 
 describe('Client', function() {
 
@@ -53,15 +54,28 @@ describe('Client', function() {
     });
   });
 
+  describe('/launcher/profile/register', function() {
+    it('should create account', async function() {
+      const path = '/launcher/profile/register';
+      const data = '{"email" : "test@test.com", "password": "test", "edition": "eod" }';
+
+      let res = await send(url, port, path, data);
+      const body = zlib.inflateSync(res).toString();
+
+      body.should.equal("OK");
+    });
+  });
+
   describe('/launcher/profile/login', function() {
     it('should login', async function() {
       const path = '/launcher/profile/login';
-      const data = '{"token" : "eyJlbWFpbCI6InVzZXJAZW11dGFya292LmNvbSIsInBhc3N3b3JkIjoicGFzc3dvcmQiLCJ0b2dnbGUiOnRydWUsInRpbWVzdGFtcCI6MTU3NzU3MjgzOX0=" }';
+      const data = '{"email" : "test@test.com", "password": "test" }';
 
       let res = await send(url, port, path, data);
-      const jsonData = parseData(res);
-
-      jsonData.should.equal(1);
+      const body = zlib.inflateSync(res);
+      accountID = body.toString();
+      let condition = accountID !== "FAILED";
+      condition.should.equal(true);
     });
   });
 
@@ -70,10 +84,10 @@ describe('Client', function() {
       const path = '/client/game/keepalive';
       const data = '';
 
-      let res = await send(url, port, path, data, 1);
-      const jsonData = parseData(res);
+      let res = await send(url, port, path, data, accountID);
+      const body = parseData(res);
 
-      jsonData.err.should.equal(0);
+      body.err.should.equal(0);
     });
   });
 
@@ -82,7 +96,7 @@ describe('Client', function() {
       const path = '/client/items';
       const data = '{"crc":1074351527}';
 
-      let res = await send(url, port, path, data, 1);
+      let res = await send(url, port, path, data, accountID);
       const jsonData = parseData(res);
 
       jsonData.err.should.equal(0);
@@ -94,7 +108,7 @@ describe('Client', function() {
       const path = '/client/globals';
       const data = '{"crc":0}';
 
-      let res = await send(url, port, path, data, 1);
+      let res = await send(url, port, path, data, accountID);
       const jsonData = parseData(res);
 
       jsonData.err.should.equal(0);
@@ -106,7 +120,7 @@ describe('Client', function() {
       const path = '/client/game/profile/list';
       const data = '{}';
 
-      let res = await send(url, port, path, data, 1);
+      let res = await send(url, port, path, data, accountID);
       const jsonData = parseData(res);
 
       jsonData.err.should.equal(0);
@@ -118,7 +132,7 @@ describe('Client', function() {
       const path = '/client/locations';
       const data = '{"crc":850408639}';
 
-      let res = await send(url, port, path, data, 1);
+      let res = await send(url, port, path, data, accountID);
       const jsonData = parseData(res);
 
       jsonData.err.should.equal(0);
@@ -130,7 +144,7 @@ describe('Client', function() {
       const path = '/client/weather';
       const data = '{}';
 
-      let res = await send(url, port, path, data, 1);
+      let res = await send(url, port, path, data, accountID);
       const jsonData = parseData(res);
 
       jsonData.err.should.equal(0);
@@ -142,7 +156,7 @@ describe('Client', function() {
       const path = '/client/locale/en';
       const data = '{"crc":2863236201}';
 
-      let res = await send(url, port, path, data, 1);
+      let res = await send(url, port, path, data, accountID);
       const jsonData = parseData(res);
 
       jsonData.err.should.equal(0);
@@ -154,7 +168,7 @@ describe('Client', function() {
       const path = '/client/game/profile/select';
       const data = '{"uid":"5c71b934354682353958e984"}';
 
-      let res = await send(url, port, path, data, 1);
+      let res = await send(url, port, path, data, accountID);
       const jsonData = parseData(res);
 
       jsonData.err.should.equal(0);
@@ -166,7 +180,7 @@ describe('Client', function() {
       const path = '/client/profile/status';
       const data = '';
 
-      let res = await send(url, port, path, data, 1);
+      let res = await send(url, port, path, data, accountID);
       const jsonData = parseData(res);
 
       jsonData.err.should.equal(0);
@@ -178,7 +192,7 @@ describe('Client', function() {
       const path = '/client/handbook/templates';
       const data = '';
 
-      let res = await send(url, port, path, data, 1);
+      let res = await send(url, port, path, data, accountID);
       const jsonData = parseData(res);
 
       jsonData.err.should.equal(0);
@@ -190,7 +204,7 @@ describe('Client', function() {
       const path = '/client/quest/list';
       const data = '{"completed":true}';
 
-      let res = await send(url, port, path, data, 1);
+      let res = await send(url, port, path, data, accountID);
       const jsonData = parseData(res);
 
       jsonData.err.should.equal(0);
@@ -202,7 +216,7 @@ describe('Client', function() {
       const path = '/client/notifier/channel/create';
       const data = '';
 
-      let res = await send(url, port, path, data, 1);
+      let res = await send(url, port, path, data, accountID);
       const jsonData = parseData(res);
 
       jsonData.err.should.equal(0);
@@ -214,7 +228,7 @@ describe('Client', function() {
       const path = '/client/mail/dialog/list';
       const data = '{"limit":30,"offset":0}';
 
-      let res = await send(url, port, path, data, 1);
+      let res = await send(url, port, path, data, accountID);
       const jsonData = parseData(res);
 
       jsonData.err.should.equal(0);
@@ -226,7 +240,7 @@ describe('Client', function() {
       const path = '/client/friend/list';
       const data = '';
 
-      let res = await send(url, port, path, data, 1);
+      let res = await send(url, port, path, data, accountID);
       const jsonData = parseData(res);
 
       jsonData.err.should.equal(0);
@@ -238,7 +252,7 @@ describe('Client', function() {
       const path = '/client/friend/request/list/inbox';
       const data = '';
 
-      let res = await send(url, port, path, data, 1);
+      let res = await send(url, port, path, data, accountID);
       const jsonData = parseData(res);
 
       jsonData.err.should.equal(0);
@@ -250,7 +264,7 @@ describe('Client', function() {
       const path = '/client/friend/request/list/outbox';
       const data = '';
 
-      let res = await send(url, port, path, data, 1);
+      let res = await send(url, port, path, data, accountID);
       const jsonData = parseData(res);
 
       jsonData.err.should.equal(0);
@@ -262,7 +276,7 @@ describe('Client', function() {
       const path = '/client/server/list';
       const data = '';
 
-      let res = await send(url, port, path, data, 1);
+      let res = await send(url, port, path, data, accountID);
       const jsonData = parseData(res);
 
       jsonData.err.should.equal(0);
@@ -284,7 +298,7 @@ describe('Client', function() {
   // describe('/OfflineRaidSave', function() {
   //   it('should save offline raid data', async function() {
   //     const path = '/OfflineRaidSave';
-      
+
   //     console.log(process.cwd());
   //     const data = readJson(`${process.cwd()}/dev/db/offlineRaidProfile.json`); // "../db/offlineRaidProfile.json");
 
@@ -309,56 +323,56 @@ function parseData(data) {
 }
 
 function send(url, _port = 443, path, data, session, type = "POST"){
-	return new Promise ((resolve, reject) => {
-		const options = { // options for https data it must stay like this
-		  hostname: url,
-		  port: _port,
-		  path: path,
-		  method: type,
-		  headers: {
-			  'User-Agent':			'UnityPlayer/2018.4.11f1 (UnityWebRequest/1.0, libcurl/7.52.0-DEV)',
-			  'Content-Type': 		'application/json',
-			  'Accept': 			'application/json',
-			  'App-Version': 		'EFT Client ' + gameVersion,
-				'GClient-RequestId': 	integer,
-		  } 
-		};
+  return new Promise ((resolve, reject) => {
+    const options = { // options for https data it must stay like this
+      hostname: url,
+      port: _port,
+      path: path,
+      method: type,
+      headers: {
+        'User-Agent':			'UnityPlayer/2018.4.11f1 (UnityWebRequest/1.0, libcurl/7.52.0-DEV)',
+        'Content-Type': 		'application/json',
+        'Accept': 			'application/json',
+        'App-Version': 		'EFT Client ' + gameVersion,
+        'GClient-RequestId': 	integer,
+      }
+    };
 
-		// Set our session if we've got one
-		if (session) {
-			options.headers['Cookie'] = `PHPSESSID=${session}`;
-		}
+    // Set our session if we've got one
+    if (session) {
+      options.headers['Cookie'] = `PHPSESSID=${session}`;
+    }
 
-		integer++; // add integer number to request counting requests and also making their stupid RequestId Counter
+    integer++; // add integer number to request counting requests and also making their stupid RequestId Counter
 
-		zlib.deflate(data, function (err, buffer) { // this is kinda working
-			const req = https.request(options, (res) => { // request https data with options above
-				console.log("  ["+integer+"]"+((integer < 10)?" ":"")+"> [Response Status Code]: " + res.statusCode + " »»" + path);
+    zlib.deflate(data, function (err, buffer) { // this is kinda working
+      const req = https.request(options, (res) => { // request https data with options above
+        console.log("  ["+integer+"]"+((integer < 10)?" ":"")+"> [Response Status Code]: " + res.statusCode + " »»" + path);
 
-				if(res.statusCode != 200){ 
-					reject("No Response: " + res.statusCode);
-				}
-				
-				let chunks = [];
+        if(res.statusCode != 200){
+          reject("No Response: " + res.statusCode);
+        }
 
-				res.on('data', (d) => {
-					chunks.push(d);
-				});
+        let chunks = [];
 
-				res.on('end', function(){
-					resolve(Buffer.concat(chunks));
-				});
-			});
+        res.on('data', (d) => {
+          chunks.push(d);
+        });
 
-			// return error if error on request
-			req.on('error', err => {
-				reject(err); 
-			});
+        res.on('end', function(){
+          resolve(Buffer.concat(chunks));
+        });
+      });
 
-			req.write(buffer);
-			req.end();
-		});
-	});
+      // return error if error on request
+      req.on('error', err => {
+        reject(err);
+      });
+
+      req.write(buffer);
+      req.end();
+    });
+  });
 }
 
 function readJson(file) { //read json file with deleting all tabulators and new lines
