@@ -76,6 +76,7 @@ class AccountServer {
 
         if (accountId !== "") {
             delete this.accounts[accountId];
+            utility.removeDir("user/profiles/" + accountId + "/");
             this.saveToDisk();
         }
 
