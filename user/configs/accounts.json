@@ -1,1 +1,10 @@
-{}
+{
+	"AID222134117620365762kvD": {
+		"id": "AID222134117620365762kvD",
+		"nickname": "",
+		"email": "senko@emutarkov.com",
+		"password": "password",
+		"wipe": false,
+		"edition": "Edge Of Darkness"
+	}
+}

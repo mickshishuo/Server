@@ -6,47 +6,78 @@
 "use strict";
 
 function connect() {
-    return json.stringify({
-        "backendUrl": server.getBackendUrl(),
-        "name": server.getName(),
-        "editions": Object.keys(db.profile)
-    });
+    return json.stringify({"err": 0, "errmsg": null, "data": {"backendUrl": server.getBackendUrl(), "name": server.getName(), "editions": Object.keys(db.profile)}});
 }
 
 function login(url, info, sessionID) {
     let output = account_f.accountServer.login(info);
-    return (output === "") ? "FAILED" : output;
+
+    if (output === "") {
+        return json.stringify({"err": 1, "errmsg": "Wrong email and/or password combination", "data": null});
+    }
+
+    return json.stringify({"err": 0, "errmsg": null, "data": output});
 }
 
 function register(url, info, sessionID) {
     let output = account_f.accountServer.register(info);
-    return (output !== "") ? "FAILED" : "OK";
+
+    if (output === "") {
+        return json.stringify({"err": 1, "errmsg": "Account already exists", "data": null});
+    }
+
+    return json.stringify({"err": 0, "errmsg": null, "data": "OK"});
 }
 
 function remove(url, info, sessionID) {
     let output = account_f.accountServer.remove(info);
-    return (output === "") ? "FAILED" : "OK";
+
+    if (output === "") {
+        return json.stringify({"err": 1, "errmsg": "Wrong email and/or password combination", "data": null});
+    }
+
+    return json.stringify({"err": 0, "errmsg": null, "data": "OK"});
 }
 
 function get(url, info, sessionID) {
     let accountId = account_f.accountServer.login(info);
     let output = account_f.accountServer.find(accountId);
-    return json.stringify(output);
+
+    if (output === "") {
+        return json.stringify({"err": 1, "errmsg": "Wrong email and/or password combination", "data": null});
+    }
+
+    return json.stringify({"err": 0, "errmsg": null, "data": json.stringify(output)});
 }
 
 function changeEmail(url, info, sessionID) {
     let output = account_f.accountServer.changeEmail(info);
-    return (output === "") ? "FAILED" : "OK";
+    
+    if (output === "") {
+        return json.stringify({"err": 1, "errmsg": "Wrong email and/or password combination", "data": null});
+    }
+
+    return json.stringify({"err": 0, "errmsg": null, "data": "OK"});
 }
 
 function changePassword(url, info, sessionID) {
     let output = account_f.accountServer.changePassword(info);
-    return (output === "") ? "FAILED" : "OK";
+    
+    if (output === "") {
+        return json.stringify({"err": 1, "errmsg": "Wrong email and/or password combination", "data": null});
+    }
+
+    return json.stringify({"err": 0, "errmsg": null, "data": "OK"});
 }
 
 function wipe(url, info, sessionID) {
     let output = account_f.accountServer.wipe(info);
-    return (output === "") ? "FAILED" : "OK";
+    
+    if (output === "") {
+        return json.stringify({"err": 1, "errmsg": "Wrong email and/or password combination", "data": null});
+    }
+
+    return json.stringify({"err": 0, "errmsg": null, "data": "OK"});
 }
 
 router.addStaticRoute("/launcher/server/connect", connect);
