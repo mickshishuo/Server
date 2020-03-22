@@ -29,24 +29,24 @@ class AccountServer {
         return undefined;
     }
 
-    exists(info) {
-        for (let accountId in this.accounts) {
-            let account = this.accounts[accountId];
-
-            if (info.email === account.email && info.password === account.password) {
-				return account.id;
-            }
-        }
-
-        return "";
-    }
-
     isWiped(sessionID) {
         return this.accounts[sessionID].wipe;
     }
 
     setWipe(sessionID, state) {
         this.accounts[sessionID].wipe = state;
+    }
+
+    login(info) {
+        for (let accountId in this.accounts) {
+            let account = this.accounts[accountId];
+
+            if (info.email === account.email && info.password === account.password) {
+				return accountId;
+            }
+        }
+
+        return "";
     }
 
     register(info) {
@@ -56,10 +56,10 @@ class AccountServer {
             }
         }
         
-        let sessionID = utility.generateNewAccountId();
+        let accountId = utility.generateNewAccountId();
 
-        this.accounts[sessionID] = {
-            "id": sessionID,
+        this.accounts[accountId] = {
+            "id": accountId,
             "nickname": "",
             "email": info.email,
             "password": info.password,
@@ -72,7 +72,7 @@ class AccountServer {
     }
     
     remove(info) {
-        let accountId = this.exists(info.email, info.password);  
+        let accountId = this.login(info);  
 
         if (accountId !== "") {
             delete this.accounts[accountId];
@@ -83,10 +83,10 @@ class AccountServer {
     }
 
     changeEmail(info) {
-        let accountId = this.exists(info.email, info.password);  
+        let accountId = this.login(info);
 
         if (accountId !== "") {
-            this.accounts[sessionID].email = info.change;
+            this.accounts[accountId].email = info.change;
             this.saveToDisk();
         }
 
@@ -94,10 +94,10 @@ class AccountServer {
     }
 
     changePassword(info) {
-        let accountId = this.exists(info.email, info.password);  
+        let accountId = this.login(info);  
 
         if (accountId !== "") {
-            this.accounts[sessionID].password = info.change;
+            this.accounts[accountId].password = info.change;
             this.saveToDisk();
         }
 
@@ -105,10 +105,10 @@ class AccountServer {
     }
 
     wipe(info) {
-        let accountId = this.exists(info.email, info.password);  
+        let accountId = this.login(info);  
 
         if (accountId !== "") {
-            this.accounts[sessionID].edition = info.edition;
+            this.accounts[accountId].edition = info.edition;
             this.setWipe(accountId, true);
             this.saveToDisk();
         }

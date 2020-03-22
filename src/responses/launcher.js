@@ -14,7 +14,7 @@ function connect() {
 }
 
 function login(url, info, sessionID) {
-    let output = account_f.accountServer.exists(info);
+    let output = account_f.accountServer.login(info);
     return (output === "") ? "FAILED" : output;
 }
 
@@ -29,7 +29,7 @@ function remove(url, info, sessionID) {
 }
 
 function get(url, info, sessionID) {
-    let accountId = account_f.accountServer.exists(info);
+    let accountId = account_f.accountServer.login(info);
     let output = account_f.accountServer.find(accountId);
     return json.stringify(output);
 }
