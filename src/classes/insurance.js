@@ -38,10 +38,23 @@ class InsuranceServer {
 
     /* adds gear to store */
     addGearToSend(pmcData, insuredItem, actualItem, sessionID) {
-        // don't send insured scabbard or secured container
-        if (insuredItem.slotId === "Scabbard" || insuredItem.slotId === "SecuredContainer") {
+        // Don't process insurance for melee weapon or secure container.
+        if (actualItem.slotId === "Scabbard" || actualItem.slotId === "SecuredContainer") {
             return;
         }
+	
+	// Check if the insured item is INSIDE a secure container.
+	// We don't process insurance for these items
+	// TODO: Move this to helper and generify it to allow checking the entire parental tree
+	for(let item of pmcData.Inventory.items) {
+		if(item.slotId === "SecuredContainer") {
+			if(actualItem.parentId === item._id) {
+				return;
+			} else {
+				break;
+			}
+		}
+	}
 
         // Mark root-level items for later.
         if (actualItem.parentId === pmcData.Inventory.equipment) {
