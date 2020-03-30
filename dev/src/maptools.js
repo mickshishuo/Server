@@ -30,7 +30,8 @@ const questLootTypes = [
   "loot_book_venskiy5864616",
   "loot_book_osnovu5868064",
   "Loot 56 (28)6937524",
-  "loot_flash_"
+  "loot_flash_",
+  "quest_golden_zibbo"
 ];
 
 function getDirList(path) {

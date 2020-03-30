@@ -1341,7 +1341,7 @@
         ]
       },
       {
-        "Id": "Loot 158 (38)6937558",
+        "Id": "quest_golden_zibbo",
         "IsStatic": false,
         "useGravity": false,
         "randomRotation": false,
