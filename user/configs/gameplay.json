@@ -1,4 +1,7 @@
 {
+    "lan": {
+        "enabled": true
+    },
     "autosave": {
         "saveOnReceive": true,
         "saveOnExit": false,
