@@ -85,7 +85,7 @@ class ProfileServer {
             pmcData.TraderStandings[trader] = {
                 "currentLevel": 1,
                 "currentSalesSum": 0,
-                "currentStanding": 0,
+                "currentStanding": currentStanding,
                 "NextLoyalty": null,
                 "loyaltyLevels": ((trader_f.traderServer.getTrader(trader)).data.loyalty.loyaltyLevels)
             };
