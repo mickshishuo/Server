@@ -16,10 +16,10 @@ class InsuranceServer {
             return;
         }
     
-        let ids_toremove = itm_hf.findAndReturnChildren(pmcData, toDo[0]); //get all ids related to this item, +including this item itself
-    
-        for (let i in ids_toremove) { //remove one by one all related items and itself
-            for (let a in pmcData.Inventory.items) {	//find correct item by id and delete it
+        let ids_toremove = itm_hf.findAndReturnChildren(pmcData, toDo[0]); // get all ids related to this item, +including this item itself
+
+        for (let i in ids_toremove) { // remove one by one all related items and itself
+            for (let a in pmcData.Inventory.items) {	// find correct item by id and delete it
                 if (pmcData.Inventory.items[a]._id === ids_toremove[i]) {
                     for (let insurance in pmcData.InsuredItems) {
                         if (pmcData.InsuredItems[insurance].itemId == ids_toremove[i]) {
@@ -38,6 +38,24 @@ class InsuranceServer {
 
     /* adds gear to store */
     addGearToSend(pmcData, insuredItem, actualItem, sessionID) {
+        // Don't process insurance for melee weapon or secure container.
+        if (actualItem.slotId === "Scabbard" || actualItem.slotId === "SecuredContainer") {
+            return;
+        }
+	
+	// Check if the insured item is INSIDE a secure container.
+	// We don't process insurance for these items
+	// TODO: Move this to helper and generify it to allow checking the entire parental tree
+	for(let item of pmcData.Inventory.items) {
+		if(item.slotId === "SecuredContainer") {
+			if(actualItem.parentId === item._id) {
+				return;
+			} else {
+				break;
+			}
+		}
+	}
+
         // Mark root-level items for later.
         if (actualItem.parentId === pmcData.Inventory.equipment) {
             actualItem.slotId = "hideout";
@@ -49,26 +67,22 @@ class InsuranceServer {
     }
 
     /* store lost pmc gear */
-    storeLostGear(pmcData, offraidData, sessionID) {
-        console.log(offraidData);
+    storeLostGear(pmcData, offraidData, preRaidGear, sessionID) {
+        // Build a hash table to reduce loops
+        const preRaidGearHash = {};
+        preRaidGear.forEach(i => preRaidGearHash[i._id] = i);
+
+        // Build a hash of offRaidGear
+        const offRaidGearHash = {};
+        offraidData.profile.Inventory.items.forEach(i => offRaidGearHash[i._id] = i);
 
         for (let insuredItem of pmcData.InsuredItems) {
-            let found = false;
-
-            /* find item */
-            for (let item of offraidData.profile.Inventory.items) {
-                if (insuredItem.itemId === item._id) {
-                    found = true;
-                    break;
-                }
-            }
-
-            /* item is lost */
-            if (!found) {
-                for (let item of pmcData.Inventory.items) {
-                    if (insuredItem.itemId === item._id) {
-                        this.addGearToSend(pmcData, insuredItem, item, sessionID);
-                    }
+            if (preRaidGearHash[insuredItem.itemId]) {
+                // This item exists in preRaidGear, meaning we brought it into the raid...
+                // Check if we brought it out of the raid
+                if (!offRaidGearHash[insuredItem.itemId]) {
+                    // We didn't bring this item out! We must've lost it.
+                    this.addGearToSend(pmcData, insuredItem, preRaidGearHash[insuredItem.itemId], sessionID);
                 }
             }
         }
@@ -126,7 +140,7 @@ class InsuranceServer {
 
     processReturn(event) {
         // Inject a little bit of a surprise by failing the insurance from time to time ;)
-        if (utility.getRandomInt(0, 99) > settings.gameplay.trading.insureReturnChance) {
+        if (utility.getRandomInt(0, 99) >= gameplayConfig.trading.insureReturnChance) {
             let insuranceFailedTemplates = json.parse(json.read(db.dialogues[event.data.traderId])).insuranceFailed;
             event.data.messageContent.templateId = insuranceFailedTemplates[utility.getRandomInt(0, insuranceFailedTemplates.length)];
             event.data.items = [];
@@ -134,6 +148,20 @@ class InsuranceServer {
     
         dialogue_f.dialogueServer.addDialogueMessage(event.data.traderId, event.data.messageContent, event.sessionId, event.data.items);
     }
+}
+
+// TODO: Move to helper functions
+function getItemPrice(_tpl) {
+	let price = 0;
+	if(_tpl in db.templates.items) {
+		let template = json.parse(json.read(db.templates.items[_tpl]));
+		price = template.Price;
+	} else {
+		let item = json.parse(json.read(db.items[_tpl]));
+		price = item._props.CreditsPrice;
+	}
+	
+	return price;
 }
 
 /* calculates insurance cost */
@@ -147,8 +175,7 @@ function cost(info, sessionID) {
         for (let key of info.items) {
             for (let item of pmcData.Inventory.items) {
                 if (item._id === key) {
-                    let template = json.parse(json.read(db.templates.items[item._tpl]));
-                    items[template.Id] = Math.round(template.Price * settings.gameplay.trading.insureMultiplier);
+                    items[item._tpl] = Math.round(getItemPrice(item._tpl) * gameplayConfig.trading.insureMultiplier);
                     break;
                 }
             }
@@ -168,11 +195,9 @@ function insure(pmcData, body, sessionID) {
     for (let key of body.items) {
         for (let item of pmcData.Inventory.items) {
             if (item._id === key) {
-                let template = json.parse(json.read(db.templates.items[item._tpl]));
-
                 itemsToPay.push({
                     "id": item._id,
-                    "count": Math.round(template.Price * settings.gameplay.trading.insureMultiplier)
+                    "count": Math.round(getItemPrice(item._tpl) * gameplayConfig.trading.insureMultiplier)
                 });
                 break;
             }

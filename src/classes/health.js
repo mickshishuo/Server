@@ -29,13 +29,8 @@ class HealthServer {
 
     offraidHeal(pmcData, body, sessionID) {
         let output = item_f.itemServer.getOutput();
-    
-        // healing body part
-        for (let bdpart in pmcData.Health.BodyParts) {
-            if (bdpart === body.part) {
-                this.healths[sessionID][bdpart] += body.count;
-            }
-        }
+
+        this.healths[sessionID][body.part] = Math.min(pmcData.Health.BodyParts[body.part].Health.Current + body.count, pmcData.Health.BodyParts[body.part].Health.Maximum);
     
         // update medkit used (hpresource)
         for (let item of pmcData.Inventory.items) {
@@ -59,7 +54,7 @@ class HealthServer {
 
     offraidEat(pmcData, body, sessionID) {        
         let output = item_f.itemServer.getOutput();
-        let todelete = false;
+        let resourceLeft;
         let maxResource = {};
         let effects = {};
     
@@ -67,22 +62,20 @@ class HealthServer {
             if (item._id === body.item) {
                 maxResource = itm_hf.getItem(item._tpl)[1]._props.MaxResource;
                 effects = itm_hf.getItem(item._tpl)[1]._props.effects_health; 
-    
+
                 if (maxResource > 1) {   
                     if ("FoodDrink" in item.upd) {
                         item.upd.FoodDrink.HpPercent -= body.count; 
-                        
-                        if (item.upd.FoodDrink.HpPercent < 1) {
-                            todelete = true;
-                        }
                     } else {
                         item.upd.FoodDrink = {"HpPercent" : maxResource - body.count};
-                    }  
+                    }
+                    
+                    resourceLeft = item.upd.FoodDrink.HpPercent;
                 }
             }
         }
 
-        if (maxResource === 1 || todelete === true) {
+        if (maxResource === 1 || resourceLeft < 1) {
             output = move_f.removeItem(pmcData, body.item, output, sessionID);
         }
         
@@ -129,7 +122,7 @@ class HealthServer {
 
     /* apply the health changes to the profile */
     applyHealth(pmcData, sessionID) {
-        if (!settings.gameplay.inraid.saveHealthEnabled) {
+        if (!gameplayConfig.inraid.saveHealthEnabled) {
             return;
         }
 
@@ -144,7 +137,7 @@ class HealthServer {
 
                 /* set body part health */
                 pmcData.Health.BodyParts[item].Health.Current = (node[item] === -1)
-                    ? Math.round((pmcData.Health.BodyParts[item].Health.Maximum * settings.gameplay.inraid.saveHealthMultiplier))
+                    ? Math.round((pmcData.Health.BodyParts[item].Health.Maximum * gameplayConfig.inraid.saveHealthMultiplier))
                     : node[item];
             } else {
                 /* set resources */

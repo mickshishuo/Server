@@ -1,22 +1,24 @@
 "use strict";
 
 function initialize() {
-	if (settings.autosave.saveOnExit) {
+	if (gameplayConfig.autosave.saveOnExit) {
 		process.on('exit', (code) => {
 			saveHandler.saveOpenSessions();
 		});
 
 		process.on('SIGINT', (code) => {
 			saveHandler.saveOpenSessions();
+			logger.logInfo("Ctrl-C, exiting ...");
+			process.exit(1);
 		});
 	}
 	
-	if (settings.autosave.saveIntervalSec > 0) {
-		setInterval(function() {
-			saveHandler.saveOpenSessions();
-			logger.logSuccess("Player progress autosaved!");
-		}, settings.autosave.saveIntervalSec * 1000);
-	}
+	if (gameplayConfig.autosave.saveIntervalSec > 0) {
+        setInterval(function() {
+            saveHandler.saveOpenSessions();
+            logger.logSuccess("Player progress autosaved!");
+        }, gameplayConfig.autosave.saveIntervalSec * 1000);
+    }
 }
 
 function saveOpenSessions() {

@@ -1,3 +1,4 @@
+const fs = require('fs');
 const childProcess = require('child_process');
 const UPX = require('upx')('best')
 const { compile } = require('nexe');
@@ -6,7 +7,7 @@ const { compile } = require('nexe');
 console.log(">>>STARTING BUILD...");
 compile({
 	input: 'core/main.js',
-    output: 'EmuTarkov-Server-Uncompressed',
+	output: 'EmuTarkov-Server-Uncompressed',
 	build: false,
 	ico: 'dev/res/icon.ico'
 }).then(function(err) {
@@ -23,11 +24,13 @@ compile({
 		'-mask',
 		'ICONGROUP,MAINICON,'
 	], function(err) {
+		fs.unlinkSync('EmuTarkov-Server-Uncompressed.exe');
 		console.log(">>>Compressing Executable...");
 		UPX('EmuTarkov-Server-Icon.exe')
 		.output('EmuTarkov-Server.exe')
 		.start().then(function(stats) {
 			console.log(stats);
+			fs.unlinkSync('EmuTarkov-Server-Icon.exe');			
 		}).catch(function (err) {
 			console.log(err);
 		});

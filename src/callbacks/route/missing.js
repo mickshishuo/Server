@@ -3,12 +3,11 @@
 const fs = require('fs');
 
 function route() {
-    if (!settings.server.rebuildCache) {
+    if (!serverConfig.rebuildCache) {
         return;
     }
     
     db.user.profiles = {
-        "list": "user/profiles.config.json",
         "character": "user/profiles/__REPLACEME__/character.json",
         "dialogue": "user/profiles/__REPLACEME__/dialogue.json",
         "storage": "user/profiles/__REPLACEME__/storage.json",
@@ -29,15 +28,18 @@ function route() {
         "mods": "user/cache/mods.json"
     };
 
-    for (let trader of utility.getDirList("db/assort/")) {
+    db.user.configs.accounts = "user/configs/accounts.json";
+    db.user.configs.gameplay = "user/configs/gameplay.json";
+
+    for (let trader in db.assort) {
         db.user.cache["assort_" + trader] = "user/cache/assort_" + trader + ".json";
 
-        if (fs.existsSync("db/assort/" + trader + "/customization/")) {
+        if ("customization" in db.assort[trader]) {
             db.user.cache["customization_" + trader] = "user/cache/customization_" + trader + ".json";
         }
     }
 
-    for (let locale of utility.getDirList("db/locales/")) {
+    for (let locale in db.locales) {
         db.user.cache["locale_" + locale] = "user/cache/locale_" + locale + ".json";
     }
 

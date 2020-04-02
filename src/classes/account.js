@@ -10,15 +10,15 @@ class AccountServer {
     }
 
     initialize() {
-        this.accounts = json.parse(json.read(db.user.profiles.list));
+        this.accounts = json.parse(json.read(db.user.configs.accounts));
     }
 
     saveToDisk() {
-        json.write(db.user.profiles.list, this.accounts);
+        json.write(db.user.configs.accounts, this.accounts);
     }
 
     find(sessionID) {
-        for (let accountId of Object.keys(this.accounts)) {
+        for (let accountId in this.accounts) {
             let account = this.accounts[accountId];
 
             if (account.id === sessionID) {
@@ -37,29 +37,88 @@ class AccountServer {
         this.accounts[sessionID].wipe = state;
     }
 
-    exists(info) {
-        for (let accountId of Object.keys(this.accounts)) {
+    login(info) {
+        for (let accountId in this.accounts) {
             let account = this.accounts[accountId];
 
             if (info.email === account.email && info.password === account.password) {
-                return account.id;
+				return accountId;
             }
         }
 
-        return 0;
+        return "";
+    }
+
+    register(info) {
+        for (let accountId in this.accounts) {
+            if (info.email === this.accounts[accountId].email) {
+				return accountId;
+            }
+        }
+        
+        let accountId = utility.generateNewAccountId();
+
+        this.accounts[accountId] = {
+            "id": accountId,
+            "nickname": "",
+            "email": info.email,
+            "password": info.password,
+            "wipe": true,
+            "edition": info.edition
+        }
+        
+        this.saveToDisk();
+        return "";
+    }
+    
+    remove(info) {
+        let accountId = this.login(info);  
+
+        if (accountId !== "") {
+            delete this.accounts[accountId];
+            utility.removeDir("user/profiles/" + accountId + "/");
+            this.saveToDisk();
+        }
+
+        return accountId;
+    }
+
+    changeEmail(info) {
+        let accountId = this.login(info);
+
+        if (accountId !== "") {
+            this.accounts[accountId].email = info.change;
+            this.saveToDisk();
+        }
+
+        return accountId;
+    }
+
+    changePassword(info) {
+        let accountId = this.login(info);  
+
+        if (accountId !== "") {
+            this.accounts[accountId].password = info.change;
+            this.saveToDisk();
+        }
+
+        return accountId;
+    }
+
+    wipe(info) {
+        let accountId = this.login(info);  
+
+        if (accountId !== "") {
+            this.accounts[accountId].edition = info.edition;
+            this.setWipe(accountId, true);
+            this.saveToDisk();
+        }
+
+        return accountId;
     }
 
     getReservedNickname(sessionID) {
         return this.accounts[sessionID].nickname;
-    }
-
-    findID(data) {
-        let buff = Buffer.from(data.token, 'base64');
-        let text = buff.toString('ascii');
-        let info = json.parse(text);
-        let sessionID = this.exists(info);
-
-        return json.stringify({profileId: sessionID});
     }
 }
 

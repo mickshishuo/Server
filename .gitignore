@@ -1,14 +1,13 @@
 ## emutarkov-server
-[Dd]ev/[Bb]in
-[Uu]ser/[Ll]ogs
-[Uu]ser/[Cc]ache
-[Uu]ser/[Ee]vents
-[Uu]ser/[Mm]ods
-[Uu]ser/[Pp]rofiles
+[Dd]ev/[Bb]in/
+[Dd]ev/[Oo]utput/
+[Uu]ser/[Ll]ogs/
+[Uu]ser/[Cc]ache/
+[Uu]ser/[Ee]vents/
+[Uu]ser/[Pp]rofiles/
+[Uu]ser/[Mm]ods/
 package-lock.json
 EmuTarkov-Server.exe
-EmuTarkov-Server-Icon.exe
-EmuTarkov-Server-Uncompressed.exe
 
 ## visual studio
 .vs

@@ -2,13 +2,26 @@
 
 // remove the labs keycard at the end of raid in labs
 function removeLabKeyCard(offraidData) {
-    if (offraidData.profile.Info.EntryPoint !== "Laboratory") {
+    if (offraidData.profile.Info.EntryPoint !== "Common") {
         return;
     }
 
     for (let item of offraidData.profile.Inventory.items) {
-        if (item._tpl === "5c94bbff86f7747ee735c08f" && item.slotId !== "Hideout") {
-            move_f.removeItemFromProfile(offraidData.profile, item._id);
+        if (item._tpl === "5c94bbff86f7747ee735c08f" && item.slotId !== "Hideout") 
+        {
+            //this will not correctly 
+            let usages = ("upd" in item && "Key" in item.upd) ? item.upd.Key.NumberOfUsages : -1;
+            if (usages == -1)
+            {
+                item.upd = {"Key": {"NumberOfUsages": 1 } };
+            }else
+            {
+                item.upd.Key.NumberOfUsages += 1;
+            }
+            if(item.upd.Key.NumberOfUsages >= itm_hf.getItem("5c94bbff86f7747ee735c08f")[1]._props.MaximumNumberOfUsage)
+            {   
+                move_f.removeItemFromProfile(offraidData.profile, item._id);
+            }
             break;
         }
     }
@@ -35,7 +48,7 @@ function markFoundItems(pmcData, offraidData, isPlayerScav) {
         }
 
         // mark item found in raid
-        if (offraidItem.hasOwnProperty("upd")) {
+        if ("upd" in offraidItem) {
             offraidItem.upd["SpawnedInSession"] = true;
         } else {
             offraidItem["upd"] = {"SpawnedInSession": true};
@@ -65,7 +78,8 @@ function deleteInventory(pmcData, sessionID) {
         if (item.parentId === pmcData.Inventory.equipment
         && item.slotId !== "SecuredContainer"
         && item.slotId !== "Scabbard"
-        && item.slotId !== "Pockets") {
+        && item.slotId !== "Pockets"
+        || item.parentId === pmcData.Inventory.questRaidItems) {
             toDelete.push(item._id);
         }
 
@@ -84,11 +98,68 @@ function deleteInventory(pmcData, sessionID) {
         move_f.removeItemFromProfile(pmcData, item);
     }
 
+    pmcData.Inventory.fastPanel = {}
+
     return pmcData;
 }
 
+function getPlayerGear(items) {
+    // Player Slots we care about
+    const inventorySlots = [
+        'FirstPrimaryWeapon',
+        'SecondPrimaryWeapon',
+        'Holster',
+        'Headwear',
+        'Earpiece',
+        'Eyewear',
+        'FaceCover',
+        'ArmorVest',
+        'TacticalVest',
+        'Backpack',
+        'pocket1',
+        'pocket2',
+        'pocket3',
+        'pocket4',
+    ];
+
+    let inventoryItems = [];
+
+    // Get an array of root player items
+    for (let item of items) {
+        if (inventorySlots.includes(item.slotId)) {
+            inventoryItems.push(item);
+        }
+    }
+
+    // Loop through these items and get all of their children
+    let newItems = inventoryItems;
+    while (newItems.length > 0) {
+        let foundItems = [];
+        
+        for (let item of newItems) {
+            // Find children of this item
+            for (let newItem of items) {
+                if (newItem.parentId === item._id) {
+                    foundItems.push(newItem);
+                }
+            }
+        }
+
+        // Add these new found items to our list of inventory items
+        inventoryItems = [
+            ...inventoryItems,
+            ...foundItems,
+        ];
+
+        // Now find the children of these items
+        newItems = foundItems;
+    }
+
+    return inventoryItems;
+}
+
 function saveProgress(offraidData, sessionID) {
-    if (!settings.gameplay.inraid.saveLootEnabled) {
+    if (!gameplayConfig.inraid.saveLootEnabled) {
         return;
     }
 
@@ -96,6 +167,7 @@ function saveProgress(offraidData, sessionID) {
     let scavData = profile_f.profileServer.getScavProfile(sessionID);
     const isPlayerScav = offraidData.isPlayerScav;
     const isDead = offraidData.exit !== "survived" && offraidData.exit !== "runner";
+    const preRaidGear = isPlayerScav ? [] : getPlayerGear(pmcData.Inventory.items);
 
     // set pmc data
     if (!isPlayerScav) {
@@ -119,9 +191,6 @@ function saveProgress(offraidData, sessionID) {
             pmcData.Info.Experience = 13129881;
         }
 
-        // set player health now
-        health_f.healthServer.applyHealth(pmcData, sessionID);
-
         // Remove the Lab card
         removeLabKeyCard(offraidData);
     }
@@ -133,13 +202,16 @@ function saveProgress(offraidData, sessionID) {
     // set profile equipment to the raid equipment
     if (isPlayerScav) {
         scavData = setInventory(scavData, offraidData.profile);
+        health_f.healthServer.initializeHealth(sessionID);
+        profile_f.profileServer.setScavProfile(sessionID, scavData);
         return;
     } else {
         pmcData = setInventory(pmcData, offraidData.profile);
+        health_f.healthServer.applyHealth(pmcData, sessionID);
     }
 
     // remove inventory if player died and send insurance items
-    insurance_f.insuranceServer.storeLostGear(pmcData, offraidData, sessionID);
+    insurance_f.insuranceServer.storeLostGear(pmcData, offraidData, preRaidGear, sessionID);
 
     if (isDead) {
         insurance_f.insuranceServer.storeDeadGear(pmcData, sessionID);

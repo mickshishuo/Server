@@ -2,7 +2,6 @@
 
 const fs = require('fs');
 const zlib = require('zlib');
-const http = require('http');
 const https = require('https');
 const selfsigned = require('selfsigned');
 
@@ -27,11 +26,11 @@ class Server {
         this.startCallback = {};
         this.receiveCallback = {};
         this.respondCallback = {};
-        this.ip = settings.server.ip;
-        this.httpPort = settings.server.httpPort;
-        this.httpsPort = settings.server.httpsPort;
-        this.backendUrl = "https://" + this.ip + ":" + this.httpsPort;
-        this.version = "dev-r23";
+        this.name = serverConfig.name;
+        this.ip = serverConfig.ip;
+        this.port = serverConfig.port;
+        this.backendUrl = "https://" + this.ip + ":" + this.port;
+        this.version = "0.12.4-R2";
         this.mime = {
             txt: 'text/plain',
             jpg: 'image/jpeg',
@@ -78,16 +77,16 @@ class Server {
         this.respondCallback[type] = worker;
     }
 
+    getName() {
+        return this.name;
+    }
+
     getIp() {
         return this.ip;
     }
 
-    getHttpPort() {
-        return this.httpPort;
-    }
-
-    getHttpsPort() {
-        return this.httpsPort;
+    getPort() {
+        return this.port;
     }
 
     getBackendUrl() {
@@ -156,7 +155,7 @@ class Server {
 
     handleRequest(req, resp) {
         const IP = req.connection.remoteAddress.replace("::ffff:", "");
-        const sessionID = parseInt(getCookies(req)['PHPSESSID']);
+        const sessionID = getCookies(req)['PHPSESSID'];
 
         logger.logRequest("[" + sessionID + "][" + IP + "] " + req.url);
     
@@ -179,10 +178,10 @@ class Server {
         if (req.method === "PUT") {
             req.on('data', function(data) {
                 // receive data
-                if (req.headers.hasOwnProperty("expect")) {
+                if ("expect" in req.headers) {
                     const requestLength = parseInt(req.headers["content-length"]);
     
-                    if (!server.putInBuffer(parseInt(req.headers.sessionid), data, requestLength)) {
+                    if (!server.putInBuffer(req.headers.sessionid, data, requestLength)) {
                         resp.writeContinue();
                     }
                 }
@@ -198,41 +197,24 @@ class Server {
         }
     }
 
-    start() {
-        /* set the ip */
-        if (settings.server.generateIp === true) {
-            this.ip = utility.getLocalIpAddress();
-        }
-
-        this.backendUrl = "https://" + this.ip + ":" + this.httpsPort;
-    
+    start() {    
         // execute start callback
-        logger.logWarning("Executing callbacks...");
+        logger.logWarning("Server: executing startup callbacks...");
 
         for (let type in this.startCallback) {
             this.startCallback[type]();
         }
 
-        /* create server (https: game, http: launcher) */
+        /* create server */
         let httpsServer = https.createServer(this.generateCertifcate(), (req, res) => {
             this.handleRequest(req, res);
-        }).listen(this.httpsPort, this.ip, function() {
-            logger.logSuccess("Started game server");
-        });
-
-        let httpServer = http.createServer((req, res) => {
-            this.handleRequest(req, res);
-        }).listen(this.httpPort, this.ip, function() {
-            logger.logSuccess("Started launcher server");
+        }).listen(this.port, this.ip, function() {
+            logger.logSuccess("Started server");
         });
 
         /* server is already running */
         httpsServer.on('error', function(e) {
-            logger.logError("» Port " + this.httpsPort + " is already in use, check if the server isn't already running");
-        });
-
-        httpServer.on('error', function(e) {
-            logger.logError("» Port " + this.httpPort + " is already in use, check if the server isn't already running");
+            logger.logError("» Port " + e.port + " is already in use, check if the server isn't already running");
         });
     }
 }

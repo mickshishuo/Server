@@ -5,17 +5,13 @@ function getRandomValue(node) {
 	return json.parse(json.read(node[keys[utility.getRandomInt(0, keys.length - 1)]]));
 }
 
+// TODO: read from file
 function addDogtag(bot, sessionID) {
 	let weaponArray = [
-		'A Magical Force',
-		'Goose With A Knife',
-		'Spartan Laser',
-		'Smashed Vodka Bottle',
-		'Heart Attack',
-		'Arrow To The Knee'
+		"EmuTarkov reverse engineering"
 	];
-	let randomNumber = Math.floor(Math.random()*weaponArray.length);
-	
+
+	let randomNumber = Math.floor(Math.random() * weaponArray.length);
 	let pmcData = profile_f.profileServer.getPmcProfile(sessionID);
 	let dogtagItem = {
 		_id: utility.generateNewItemId(),
@@ -39,39 +35,17 @@ function addDogtag(bot, sessionID) {
 	return bot;
 }
 
-function removeSecureContainer(bot) {
-	let idsToRemove = [];
-
-	for (let item of bot.Inventory.items) {
-        if (item.slotId === "SecuredContainer") {
-			idsToRemove = itm_hf.findAndReturnChildren(bot, item._id);
-        }
-	}
-	
-	if (idsToRemove.length > 0) {
-		for (let itemId of idsToRemove) {
-			for (let index in bot.Inventory.items) {
-				if (bot.Inventory.items[index]._id === itemId) {
-					bot.Inventory.items.splice(index, 1);
-				}
-			}
-		}
-	}
-
-	return bot;
-}
-
 function generateBot(bot, role, sessionID) {
 	let type = (role === "cursedAssault") ? "assault" : role;
 	let node = {};
 
 	// chance to spawn simulated PMC players
-	if ((type === "assault" || type === "marksman" || type === "pmcBot") && settings.gameplay.bots.pmcEnabled) {
+	if ((type === "assault" || type === "marksman" || type === "pmcBot") && gameplayConfig.bots.pmcEnabled) {
 		let spawnChance = utility.getRandomInt(0, 99);
 		let sideChance = utility.getRandomInt(0, 99);
 
-		if (spawnChance < settings.gameplay.bots.pmcSpawnChance) {
-			if (sideChance < settings.gameplay.bots.pmcUsecChance) {
+		if (spawnChance < gameplayConfig.bots.pmcSpawnChance) {
+			if (sideChance < gameplayConfig.bots.pmcUsecChance) {
 				bot.Info.Side = "Usec";
 				type = "usec";
 			} else {
@@ -106,9 +80,6 @@ function generateBot(bot, role, sessionID) {
 	if (type === "usec" || type === "bear") {
 		bot = addDogtag(bot, sessionID);
 	}
-
-	// remove secure container
-	bot = removeSecureContainer(bot);
 	
 	return bot;
 }
@@ -131,10 +102,27 @@ function generate(info, sessionID) {
 }
 
 function generatePlayerScav() {
-	let scavData = generate({"conditions":[{"Role":"playerScav","Limit":1,"Difficulty":"normal"}]});
+    let scavData = generate({"conditions":[{"Role":"playerScav","Limit":1,"Difficulty":"normal"}]});
+    let items = scavData[0].Inventory.items;
 
-	scavData[0].Info.Settings = {};
-	return scavData[0];
+    // Remove secured container
+    for (let item of items) {
+        if (item.slotId === "SecuredContainer") {
+            let toRemove = itm_hf.findAndReturnChildrenByItems(items, item._id);
+            let n = items.length;
+
+            while (n --> 0) {
+                if (toRemove.includes(items[n]._id)) {
+                    items.splice(n, 1);
+                }
+            }
+
+            break;
+        }
+    }
+
+    scavData[0].Info.Settings = {};
+    return scavData[0];
 }
 
 module.exports.generate = generate;

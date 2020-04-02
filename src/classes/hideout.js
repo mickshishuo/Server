@@ -10,7 +10,7 @@ function initialize() {
 	scavcase = json.parse(json.read(db.user.cache.hideout_scavcase));
 }
 
-function hideoutUpgrade(pmcData, body, sessionID) {
+function upgrade(pmcData, body, sessionID) {
 	for (let itemToPay of body.items) {
 		for (let inventoryItem in pmcData.Inventory.items) {
 			if (pmcData.Inventory.items[inventoryItem]._id !== itemToPay.id) {
@@ -50,46 +50,36 @@ function hideoutUpgrade(pmcData, body, sessionID) {
 }
 
 // validating the upgrade
-// TODO: apply bonusses or is it automatically applied? 
-function hideoutUpgradeComplete(pmcData, body, sessionID) {
-	for (let hideoutArea of pmcData.Hideout.Areas) {
-		if (hideoutArea.type !== body.areaType) {
-			continue;
-		}
+function upgradeComplete(pmcData, body, sessionID) {
+	for (let hideoutArea in pmcData.Hideout.Areas) {
+		if (pmcData.Hideout.Areas[hideoutArea].type !== body.areaType){ continue; }
 
 		// upgrade area
-		hideoutArea.level++;	
-		hideoutArea.completeTime = 0;
-		hideoutArea.constructing = false;
+		pmcData.Hideout.Areas[hideoutArea].level++;	
+		pmcData.Hideout.Areas[hideoutArea].completeTime = 0;
+		pmcData.Hideout.Areas[hideoutArea].constructing = false;
+		
+		//go to apply bonuses
+		for(let area_bonus of areas.data)
+		{
+			if( area_bonus.type !== pmcData.Hideout.Areas[hideoutArea].type){ continue; }
 
-		// we need to set the right stash size
-		if (body.areaType === 3) {
-			for (let item of pmcData.Inventory.items) {
-				let counter = 0;
+			let arrayofBonuses = area_bonus.stages[pmcData.Hideout.Areas[hideoutArea].level].bonuses;
 
-				for (let bonus of pmcData.Bonusses) {
-					if (bonus.type === "StashSize") {
-						counter++;
-					}
-
-					if (hideoutArea.level === counter) {
-						item._tpl = bonus.templateId;
-						break;
-					}
-				}
-
-				if (hideoutArea.level === counter) {
-					break;
+			if(arrayofBonuses.length > 0)
+			{
+				for(let bonusInArray of arrayofBonuses)
+				{
+					pmcData.Bonuses.push(bonusInArray); //just do stupid things like bsg does
 				}
 			}
 		}
 	}
-		
 	return item_f.itemServer.getOutput();
 }
 
 // move items from hideout
-function hideoutPutItemsInAreaSlots(pmcData, body, sessionID) {
+function putItemsInAreaSlots(pmcData, body, sessionID) {
 	let output = item_f.itemServer.getOutput();
 
 	for (let itemToMove in body.items) {
@@ -111,10 +101,18 @@ function hideoutPutItemsInAreaSlots(pmcData, body, sessionID) {
 							"upd": inventoryItem.upd
 						}
 					]
-				};
-
-				pmcData.Hideout.Areas[area].slots.push(slot_to_add);
+				}
+				let slot_position = parseInt(itemToMove);
+				if(pmcData.Hideout.Areas[area].slots[slot_position] === undefined)
+				{
+					pmcData.Hideout.Areas[area].slots.push(slot_to_add)
+				}
+				else
+				{
+					pmcData.Hideout.Areas[area].slots.splice(slot_position, 1, slot_to_add);
+				}
 				output = move_f.removeItem(pmcData, inventoryItem._id, output, sessionID);
+
 			}
 		}
 	}
@@ -122,30 +120,54 @@ function hideoutPutItemsInAreaSlots(pmcData, body, sessionID) {
 	return output;
 }
 
-function hideoutTakeItemsFromAreaSlots(pmcData, body, sessionID) {
+function takeItemsFromAreaSlots(pmcData, body, sessionID) {
 	let output = item_f.itemServer.getOutput();
 
 	for (let area in pmcData.Hideout.Areas) {
-		if (pmcData.Hideout.Areas[area].type !== body.areaType) {
-			continue;
+		if (pmcData.Hideout.Areas[area].type !== body.areaType) { continue; }
+
+		if(pmcData.Hideout.Areas[area].type == 4)
+		{	
+			let itemToMove = pmcData.Hideout.Areas[area].slots[body.slots[0]].item[0];
+			let newReq = {
+				"item_id": itemToMove._tpl,
+				"count": 1,
+				"tid": "ragfair"
+			};
+			output = move_f.addItem(pmcData, newReq, output, sessionID);
+
+			pmcData = profile_f.profileServer.getPmcProfile(sessionID);
+			output.data.items.new[0].upd = itemToMove.upd;
+
+			for( let item in pmcData.Inventory.items )
+			{
+				if( pmcData.Inventory.items[item]._id == output.data.items.new[0]._id)
+				{
+					pmcData.Inventory.items[item].upd = itemToMove.upd;
+				}
+			}
+			pmcData.Hideout.Areas[area].slots[body.slots[0]] = {"item" : null};			
+		}
+		else
+		{
+			let newReq = {
+				"item_id": pmcData.Hideout.Areas[area].slots[0].item[0]._tpl,
+				"count": 1,
+				"tid": "ragfair"
+			};
+			
+			output = move_f.addItem(pmcData, newReq, output, sessionID);
+			pmcData = profile_f.profileServer.getPmcProfile(sessionID);
+			pmcData.Hideout.Areas[area].slots.splice(0, 1);
 		}
 
-		let newReq = {
-			"item_id": pmcData.Hideout.Areas[area].slots[0].item[0]._tpl,
-			"count": 1,
-			"tid": "579dc571d53a0658a154fbec"
-		};
-		
-		output = move_f.addItem(pmcData, newReq, output, sessionID);
-		
-		pmcData = profile_f.profileServer.getPmcProfile(sessionID);
-		pmcData.Hideout.Areas[area].slots.splice(0, 1);
+
 	}
 
 	return output;
 }
 
-function hideoutToggleArea(pmcData, body, sessionID) {
+function toggleArea(pmcData, body, sessionID) {
 	for (let area in pmcData.Hideout.Areas) {
 		if (pmcData.Hideout.Areas[area].type == body.areaType) {	
 			pmcData.Hideout.Areas[area].active = body.enabled;
@@ -155,7 +177,7 @@ function hideoutToggleArea(pmcData, body, sessionID) {
 	return item_f.itemServer.getOutput();
 }
 
-function hideoutSingleProductionStart(pmcData, body, sessionID) {
+function singleProductionStart(pmcData, body, sessionID) {
 	registerProduction(pmcData, body, sessionID);
 
 	let output = item_f.itemServer.getOutput();
@@ -221,13 +243,34 @@ function scavCaseProductionStart(pmcData, body, sessionID) {
 	return item_f.itemServer.getOutput();
 }
 
-function hideoutContinuousProductionStart(pmcData, body, sessionID) {
+function continuousProductionStart(pmcData, body, sessionID) {
 	registerProduction(pmcData, body, sessionID);
 	return item_f.itemServer.getOutput();
 }
 
-function hideoutTakeProduction(pmcData, body, sessionID) {
+function getBTC(pmcData, body, sessionID) {
 	let output = item_f.itemServer.getOutput();
+
+	let newBTC = {
+		"item_id": "59faff1d86f7746c51718c9c",
+		"count": 1,
+		"tid": "ragfair"
+	};
+
+	for(let bitcoin in pmcData.Hideout.Production["20"].Products) {
+		output = move_f.addItem(pmcData, newBTC, output, sessionID, true);
+	}
+	pmcData.Hideout.Production["20"].Products = [];
+
+	return output;
+}
+
+function takeProduction(pmcData, body, sessionID) {
+	let output = item_f.itemServer.getOutput();
+
+	if(body.recipeId === "5d5c205bd582a50d042a3c0e") {
+		return getBTC(pmcData, body, sessionID);
+	}
 
 	for (let receipe in production.data) {	
 		if (body.recipeId !== production.data[receipe]._id) {
@@ -252,7 +295,7 @@ function hideoutTakeProduction(pmcData, body, sessionID) {
 		let newReq = {
 			"item_id": id,
 			"count": production.data[receipe].count,
-			"tid": "579dc571d53a0658a154fbec"
+			"tid": "ragfair"
 		};
 		
 		return move_f.addItem(pmcData, newReq, output, sessionID, true);	
@@ -275,7 +318,7 @@ function hideoutTakeProduction(pmcData, body, sessionID) {
 				let newReq = {
 					"item_id": itemProd._tpl,
 					"count": 1,
-					"tid": "579dc571d53a0658a154fbec"
+					"tid": "ragfair"
 				};
 
 				output = move_f.addItem(pmcData, newReq, output, sessionID, true);
@@ -291,12 +334,13 @@ function hideoutTakeProduction(pmcData, body, sessionID) {
 
 function registerProduction(pmcData, body, sessionID) {
 	for (let receipe in production.data) {
-		if (body.recipeId === production.data[receipe]._id) {
+		if (body.recipeId === production.data[receipe]._id) {	
 			pmcData.Hideout.Production[production.data[receipe].areaType] = { 
 				"Progress": 0,
 				"inProgress": true,
 				"RecipeId": body.recipeId,
 				"Products": [],
+				"SkipTime": 0,
 				"StartTime": Math.floor(Date.now() / 1000)
 			};
 		}
@@ -304,12 +348,12 @@ function registerProduction(pmcData, body, sessionID) {
 }
 
 module.exports.initialize = initialize;
-module.exports.hideoutUpgrade = hideoutUpgrade;
-module.exports.hideoutUpgradeComplete = hideoutUpgradeComplete;
-module.exports.hideoutPutItemsInAreaSlots = hideoutPutItemsInAreaSlots;
-module.exports.hideoutTakeItemsFromAreaSlots = hideoutTakeItemsFromAreaSlots;
-module.exports.hideoutToggleArea = hideoutToggleArea;
-module.exports.hideoutSingleProductionStart  = hideoutSingleProductionStart;
-module.exports.hideoutContinuousProductionStart = hideoutContinuousProductionStart;
+module.exports.upgrade = upgrade;
+module.exports.upgradeComplete = upgradeComplete;
+module.exports.putItemsInAreaSlots = putItemsInAreaSlots;
+module.exports.takeItemsFromAreaSlots = takeItemsFromAreaSlots;
+module.exports.toggleArea = toggleArea;
+module.exports.singleProductionStart  = singleProductionStart;
+module.exports.continuousProductionStart = continuousProductionStart;
 module.exports.scavCaseProductionStart = scavCaseProductionStart;
-module.exports.hideoutTakeProduction = hideoutTakeProduction;
+module.exports.takeProduction = takeProduction;

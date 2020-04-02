@@ -5,7 +5,6 @@ class TraderServer {
     constructor() {
         this.traders = {};
         this.assorts = {};
-        this.customization = {};
 
         this.initializeTraders();
     }
@@ -14,23 +13,14 @@ class TraderServer {
     initializeTraders() {
         logger.logWarning("Loading traders into RAM...");
 
-        for (let id in db.traders) {
-            this.traders[id] = json.parse(json.read(db.traders[id]));
-        }
-    }
-
-    initializeCustomization() {
-        logger.logWarning("Loading customization into RAM...");
-
-        for (let id in db.traders) {
-            if ("customization_" + id in db.user.cache) {
-                this.customization[id] = json.parse(json.read(db.user.cache["customization_" + id]));
-            }
+        for (let id in db.assort) {
+            this.traders[id] = json.parse(json.read(db.assort[id].base));
+            this.traders[id].sell_category = Object.keys(json.parse(json.read(db.assort[id].categories)));
         }
     }
 
     getTrader(id) {
-        return {err: 0, errmsg: "", data: this.traders[id]};
+        return {err: 0, errmsg: null, data: this.traders[id]};
     }
 
     getAllTraders(sessionID) {
@@ -38,6 +28,10 @@ class TraderServer {
         let traders = [];
 
         for (let traderId in this.traders) {
+            if (traderId === "ragfair") {
+                continue;
+            }
+
             let trader = this.traders[traderId];
 
             trader.loyalty.currentLevel = pmcData.TraderStandings[traderId].currentLevel;
@@ -87,7 +81,7 @@ class TraderServer {
     }
 
     getAssort(traderId) {
-        if (!("traderId" in this.assorts)) {
+        if (!(traderId in this.assorts)) {
             this.generateAssort(traderId);
         }
         
@@ -104,7 +98,7 @@ class TraderServer {
         let base = json.parse(json.read(db.user.cache["assort_" + traderId]));
 
         // 1 is min level, 4 is max level
-        if (traderId !== "579dc571d53a0658a154fbec") {
+        if (traderId !== "ragfair") {
             let keys = Object.keys(base.data.loyal_level_items);
             let level = this.traders[traderId].loyalty.currentLevel;
 
@@ -125,7 +119,7 @@ class TraderServer {
         let names = Object.keys(db.assort["579dc571d53a0658a154fbec"].loyal_level_items);
         let added = [];
 
-        for (let i = 0; i < settings.gameplay.trading.fenceAssortSize; i++) {
+        for (let i = 0; i < gameplayConfig.trading.fenceAssortSize; i++) {
             let id = names[utility.getRandomInt(0, names.length - 1)];
 
             if (added.includes(id)) {
@@ -142,95 +136,155 @@ class TraderServer {
         this.assorts['579dc571d53a0658a154fbec'] = base;
     }
 
+    // delete assort keys
     removeItemFromAssort(assort, id) {
-        let toDo = [id];
+        let ids_toremove = itm_hf.findAndReturnChildren(assort, id);
 
-        // delete assort keys
         delete assort.data.barter_scheme[id];
         delete assort.data.loyal_level_items[id];
 
-        // find and delete all related items
-        if (toDo[0] !== undefined && toDo[0] !== null && toDo[0] !== "undefined") {
-            let ids_toremove = this.findAndReturnChildren(assort, toDo[0]);
+        for (let i in ids_toremove) {
+            for (let a in assort.data.items) {
+                if (assort.data.items[a]._id === ids_toremove[i]) {
+                    assort.data.items.splice(a, 1);
+                }
+            }
+        }
 
-            for (let i in ids_toremove) {
-                for (let a in assort.data.items) {
-                    if (assort.data.items[a]._id === ids_toremove[i]) {
-                        assort.data.items.splice(a, 1);
+        return assort;
+    }
+
+    getCustomization(traderId, sessionID) {
+        let pmcData = profile_f.profileServer.getPmcProfile(sessionID);
+        let allSuits = customization_f.getCustomization().data;
+        let suitArray = json.parse(json.read(db.user.cache["customization_" + traderId]));
+        let suitList = [];
+
+        for (let suit of suitArray) {
+            if (suit.suiteId in customization_f.getCustomization().data) {
+                for (var i = 0; i < allSuits[suit.suiteId]._props.Side.length; i++) {
+                    let side = allSuits[suit.suiteId]._props.Side[i];
+
+                    if (side === pmcData.Info.Side) {
+                     suitList.push(suit);
                     }
                 }
             }
-
-            return assort;
-        }
-
-        logger.logError("assort item id is not valid");
-        return "";
-    }
-
-    findAndReturnChildren(assort, itemid) {
-        let list = [];
-
-        for (let childitem of assort.data.items) {
-            if (childitem.parentId === itemid) {
-                list.push.apply(list, this.findAndReturnChildren(assort, childitem._id));
-            }
-        }
-
-        list.push(itemid);// it's required
-        return list;
-    }
-
-    getCustomization(traderId) {
-        if (!("traderId" in this.customization) && "customization_" + traderId in db.user.cache) {
-            this.customization[traderId] = json.parse(json.read(db.user.cache["customization_" + traderId]));
         }
         
-        return this.customization[traderId];
+        return suitList;
     }
 
-    getAllCustomization() {
+    getAllCustomization(sessionID) {
         let output = [];
-
-        for (let traderId in this.customization) {
-            output = output.concat(this.getCustomization(traderId));
+        
+		for (let traderId in this.traders) {
+			if(db.user.cache["customization_" + traderId] !== undefined) {
+				output = output.concat(this.getCustomization(traderId, sessionID));
+			}
         }
 
         return output;
     }
 }
 
+/*
+    function to calculate the price of each player items in the inventory when selling
+*/
 function getPurchasesData(tmpTraderInfo, sessionID) {
     let pmcData = profile_f.profileServer.getPmcProfile(sessionID);
-    let currency = itm_hf.getCurrency(trader_f.traderServer.getTrader(tmpTraderInfo, sessionID).data.currency);
+    let traderData = trader_f.traderServer.getTrader(tmpTraderInfo, sessionID);
+    let traderCategories = json.parse(json.read(db.assort[tmpTraderInfo].categories));
+    let currency = itm_hf.getCurrency(traderData.data.currency);
     let output = {};
 
     // get sellable items
-    for (let item of pmcData.Inventory.items) {
-        if (item._id !== pmcData.Inventory.equipment
-        && item._id !== pmcData.Inventory.stash
-        && item._id !== pmcData.Inventory.questRaidItems
-        && item._id !== pmcData.Inventory.questStashItems
-        && !itm_hf.isNotSellable(item._tpl)) {
-            // calculate normal price and count
-            let price = (items.data[item._tpl]._props.CreditsPrice >= 1 ? items.data[item._tpl]._props.CreditsPrice : 1);
-            let count = (typeof item.upd !== "undefined" ? (typeof item.upd.StackObjectsCount !== "undefined" ? item.upd.StackObjectsCount : 1) : 1);
-
-            // uses profile information to get the level of the dogtag and multiplies
-            if ("upd" in item && "Dogtag" in item.upd && itm_hf.isDogtag(item._tpl)) {
-                price *= item.upd.Dogtag.Level;
-            }
-
-            // get real price
-            price = price * count * settings.gameplay.trading.sellMultiplier;
-            price = itm_hf.fromRUB(price, currency);
-            price = (price > 0 && price !== "NaN" ? price : 1);
-            
-            output[item._id] = [[{"_tpl": currency, "count": price.toFixed(0)}]];
+    for (let item of pmcData.Inventory.items) 
+    {
+        let price = 0;
+        if (item._id === pmcData.Inventory.equipment
+        || item._id === pmcData.Inventory.stash
+        || item._id === pmcData.Inventory.questRaidItems
+        || item._id === pmcData.Inventory.questStashItems
+        || itm_hf.isNotSellable(item._tpl) 
+        || traderFilter(Object.keys(traderCategories), item._tpl) == false) {
+            continue;
         }
+
+        // find all child of the item and sum the price 
+        for (let childItemId of itm_hf.findAndReturnChildren(pmcData, item._id)) {
+            let childitem = itm_hf.findInventoryItemById(pmcData, childItemId);
+            
+            if (childitem === false) {
+                // root item
+                let count = ("upd" in item && "StackObjectsCount" in item.upd) ? childitem.upd.StackObjectsCount : 1;
+                price = ((items.data[item._tpl]._props.CreditsPrice >= 1) ? items.data[item._tpl]._props.CreditsPrice : 1) * count;
+            } else {
+                // child item
+                let tempPrice = (items.data[childitem._tpl]._props.CreditsPrice >= 1) ? items.data[childitem._tpl]._props.CreditsPrice : 1;
+                let count = ("upd" in childitem && "StackObjectsCount" in childitem.upd) ? childitem.upd.StackObjectsCount : 1;
+                price = price + (tempPrice * count);
+            }
+        }
+
+        // dogtag calculation
+        if ("upd" in item && "Dogtag" in item.upd && itm_hf.isDogtag(item._tpl)) {
+            price *= item.upd.Dogtag.Level;
+        }
+
+        // meds calculation
+        let hpresource = ("upd" in item && "Medkit" in item.upd) ? item.upd.MedKit.HpResource : 0;  
+        if (hpresource > 0) {
+            let maxHp = itm_hf.getItem(item._tpl)[1]._props.MaxHpResource;
+            price *= (hpresourc / maxHp);
+        }
+
+        // weapons and armor calculation
+        let repairable = ("upd" in item && "Repairable" in item.upd) ? item.upd.Repairable : 1;
+        if (repairable !== 1 ) {
+            price *= (repairable.Durability / repairable.MaxDurability)
+        }
+
+        // get real price
+        //price *= traderCategories[sellFilter[1]];
+        price = itm_hf.fromRUB(price, currency);
+        price = (price > 0 && price !== "NaN") ? price : 1;
+        
+        output[item._id] = [[{"_tpl": currency, "count": price.toFixed(0)}]];
     }
 
     return output;
+}
+
+/*
+check if an item is allowed to be sold to a trader
+input : array of handbook categories, itemTpl of inventory
+output : boolean
+*/
+function traderFilter(traderFilters, tplToCheck) {
+
+    for (let filter of traderFilters) 
+    {
+        for (let iaaaaa of itm_hf.templatesWithParent(filter)) 
+        {
+            if (iaaaaa == tplToCheck) 
+            {
+                return true;
+            }
+        }
+        
+        for (let subcateg of itm_hf.childrenCategories(filter)) 
+        {
+            for (let itemFromSubcateg of itm_hf.templatesWithParent(subcateg)) 
+            {
+                if (itemFromSubcateg == tplToCheck) 
+                {
+                    return true;
+                }
+            }
+        }
+    }
+    return false;
 }
 
 module.exports.traderServer = new TraderServer();
