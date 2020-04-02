@@ -76,10 +76,8 @@ class ProfileServer {
         storage.data._id = "pmc" + account.id;
         
         //Version standing bonus for traders
-        if(account.edition === "Edge Of Darkness"){
+        if(account.edition === "Edge Of Darkness" || "Prepare To Escape"){
             currentStanding = 0.20;
-        } else if (account.edition === "Prepare To Escape"){
-            currentStanding = 0.10; //No idea how much Prepare To Escape get at the account creation
         } else { currentStanding = 0;}
         
         // set trader standing      
