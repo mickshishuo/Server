@@ -62,7 +62,8 @@ class ProfileServer {
         let folder = account_f.getPath(account.id);
         let pmcData = json.parse(json.read(db.profile[account.edition]["character_" + info.side.toLowerCase()]));
         let storage = json.parse(json.read(db.profile[account.edition]["storage_" + info.side.toLowerCase()]));
-
+        let currentStanding = 0;
+        
         // pmc info
         pmcData._id = "pmc" + account.id;
         pmcData.aid = account.id;
@@ -73,7 +74,14 @@ class ProfileServer {
 
         // storage info
         storage.data._id = "pmc" + account.id;
-
+        
+        //Version standing bonus for traders
+        if(account.edition === "Edge Of Darkness"){
+            currentStanding = 0.20;
+        } else if (account.edition === "Prepare To Escape"){
+            currentStanding = 0.10; //No idea how much Prepare To Escape get at the account creation
+        } else { currentStanding = 0;}
+        
         // set trader standing      
         for (let trader in db.assort) {
             pmcData.TraderStandings[trader] = {
