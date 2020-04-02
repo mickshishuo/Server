@@ -6,7 +6,7 @@
 	"type": "PickUp",
 	"isKey": false,
 	"restartable": false,
-	"min_level": 1,
+	"min_level": 47,
 	"canShowNotificationsInGame": true,
 	"rewards": {
 		"Started": [],
@@ -19,7 +19,7 @@
 				"_parent": "Level",
 				"_props": {
 					"compareMethod": ">=",
-					"value": "2",
+					"value": "47",
 					"index": 0,
 					"parentId": "",
 					"id": "59a9269486f7747aab09a77c"

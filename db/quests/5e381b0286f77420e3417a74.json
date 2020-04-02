@@ -6,7 +6,7 @@
 	"type": "PickUp",
 	"isKey": false,
 	"restartable": false,
-	"min_level": 1,
+	"min_level": 40,
 	"canShowNotificationsInGame": true,
 	"rewards": {
 		"Started": [],
@@ -36,10 +36,20 @@
 				"_parent": "Level",
 				"_props": {
 					"compareMethod": ">=",
-					"value": "2",
+					"value": "40",
 					"index": 0,
 					"parentId": "",
 					"id": "59a9269486f7747aab09a77c"
+				}
+			},
+			{
+				"_parent": "Quest",
+				"_props": {
+					"target": "5ae4497b86f7744cf402ed00",
+					"status": 4,
+					"index": 1,
+					"parentId": "",
+					"id": ""
 				}
 			}
 		],
