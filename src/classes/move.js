@@ -253,7 +253,13 @@ function mergeItem(pmcData, body, sessionID) {
                 if (items.from[key2]._id && items.from[key2]._id === body.item) {
                     let stackItem0 = 1;
                     let stackItem1 = 1;
-
+                    
+                    if(!items.to[key].upd.StackObjectsCount){
+                        items.to[key].upd.StackObjectsCount = 1
+                    } else if (!items.from[key2].upd.StackObjectsCount){
+                        items.from[key2].upd.StackObjectsCount = 1
+                    }
+                    
                     if ("upd" in items.to[key]) {
                         stackItem0 = items.to[key].upd.StackObjectsCount;
                     }
