@@ -69,13 +69,10 @@ class TraderServer {
             && loyaltyLevels[level].minStanding <= pmcData.TraderStandings[id].currentStanding)
             && targetLevel < 4) {
                 targetLevel++;
-                continue;
             }
-
-            pmcData.TraderStandings[id].currentLevel = targetLevel;
-            break;
         }
-
+        pmcData.TraderStandings[id].currentLevel = targetLevel;
+        this.traders[id].loyalty.currentLevel = targetLevel;
         // set assort
         this.generateAssort(id);
     }
