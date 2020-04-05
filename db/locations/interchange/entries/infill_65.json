@@ -2,7 +2,8 @@
 	"Id": "SE_SPAWNS/1_1(1)",
 	"Sides": [
 		"Usec",
-		"Bear"
+		"Bear",
+		"Savage"
 	],
 	"InfiltrationZone": "MallSE",
 	"Position": {

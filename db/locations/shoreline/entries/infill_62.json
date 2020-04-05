@@ -2,7 +2,8 @@
 	"Id": "SPAWNS/PMC Spawn (67)",
 	"Sides": [
 		"Usec",
-		"Bear"
+		"Bear",
+		"Savage"
 	],
 	"InfiltrationZone": "Village",
 	"Position": {

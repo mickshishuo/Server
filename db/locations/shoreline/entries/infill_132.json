@@ -2,7 +2,8 @@
 	"Id": "SPAWNS2/PMC Spawn (65)",
 	"Sides": [
 		"Usec",
-		"Bear"
+		"Bear",
+		"Savage"
 	],
 	"InfiltrationZone": "Riverside",
 	"Position": {
