@@ -2,7 +2,8 @@
 	"Id": "spawns_var2/PMC House Spawn 7",
 	"Sides": [
 		"Usec",
-		"Bear"
+		"Bear",
+		"Savage"
 	],
 	"InfiltrationZone": "House",
 	"Position": {
